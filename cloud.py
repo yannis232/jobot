@@ -114,7 +114,7 @@ class Cloud:
 
     def login_page(self, start, error='', status='200 OK'):
         page = (app.ROOT / 'web' / 'login.html').read_text(encoding='utf-8')
-        page = page.replace('__LOGIN_ERROR__', html.escape(error)).replace('__LOGIN_CSRF__', self.csrf())
+        page = page.replace('__LOGIN_ERROR__', html.escape(error)).replace('__LOGIN_CSRF__', self.csrf()).replace('__LOGIN_USERNAME__', html.escape(self.username, quote=True))
         return self.response(start, status, page, 'text/html; charset=utf-8')
 
     def login(self, env, start, body):

@@ -8,6 +8,18 @@ import secrets
 from pathlib import Path
 
 
+def ask_password():
+    while True:
+        password = getpass.getpass('Choisis un mot de passe propre à JobBot (16 caractères minimum, invisible) : ')
+        if len(password) < 16:
+            print(f'{len(password)} caractères saisis : il en faut au moins 16. Recommence avec une phrase de plusieurs mots.')
+            continue
+        again = getpass.getpass('Confirme ce mot de passe : ')
+        if password == again:
+            return password
+        print('Les deux saisies diffèrent. Recommence ; le mot de passe actuel est conservé.')
+
+
 def configure(domain, password=None, home=None, reset_password=False):
     if not re.fullmatch(r'[a-zA-Z0-9_-]+\.(?:eu\.)?pythonanywhere\.com', str(domain)):
         raise ValueError('Indique le domaine exact affiché dans ton onglet Web PythonAnywhere.')
@@ -23,10 +35,7 @@ def configure(domain, password=None, home=None, reset_password=False):
                     'JOBBOT_DATA_DIR': str(data), 'JOBBOT_HOSTING_PROVIDER': 'pythonanywhere-free'}
     if reset_password or 'JOBBOT_OWNER_PASSWORD' not in settings:
         if password is None:
-            password = getpass.getpass('Choisis un mot de passe propre à JobBot (16 caractères minimum, invisible) : ')
-            again = getpass.getpass('Confirme ce mot de passe : ')
-            if password != again:
-                raise ValueError('Les deux mots de passe diffèrent. Aucun fichier créé.')
+            password = ask_password()
         if len(password) < 16:
             raise ValueError('Utilise au moins 16 caractères. Aucun fichier créé.')
         settings['JOBBOT_OWNER_PASSWORD'] = password

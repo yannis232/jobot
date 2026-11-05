@@ -6,6 +6,7 @@ import re
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 from pathlib import Path
 from urllib.parse import urlencode
@@ -98,6 +99,17 @@ class CloudTests(unittest.TestCase):
         self.assertEqual(self.login(old_password)[0], 401)
         self.assertEqual(self.login(new_password)[0], 303)
         self.assertEqual((data / 'temoin.txt').read_text(), 'à conserver')
+
+    def test_console_retries_short_password_and_mismatched_confirmation(self):
+        home = app.DATA / 'home'
+        private, data = configure('exemple.pythonanywhere.com', password='Ancien mot de passe fictif', home=home)
+        valid = 'Nouvelle phrase FICTIVE de plusieurs mots'
+        with patch('configure_pythonanywhere.getpass.getpass', side_effect=['court', valid, 'different', valid, valid]), patch('sys.stdout', new_callable=io.StringIO) as output:
+            configure('exemple.pythonanywhere.com', home=home, reset_password=True)
+        self.assertEqual(json.loads(private.read_text())['JOBBOT_OWNER_PASSWORD'], valid)
+        self.assertIn('5 caractères saisis', output.getvalue())
+        self.assertIn('Les deux saisies diffèrent', output.getvalue())
+        self.assertNotIn(valid, output.getvalue())
 
     def test_login_cookie_logout_and_expiration(self):
         self.assertEqual(self.login('incorrect')[0], 401)
