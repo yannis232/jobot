@@ -16,6 +16,7 @@
     toast('Installe une seule fois le module pour lancer la recherche sur les huit sites. Tu peux déjà importer une annonce par son lien et utiliser tes CV.',true);
   };
   function cloudSetup(){
+    $('#setup-profile-form .badge').textContent='ENREGISTRÉ DANS TON ESPACE PRIVÉ';
     $('#open-jobbot-browser').hidden=true;
     $('#browser-status').textContent=bridgeReady?'Ton navigateur est connecté à ce JobBot Cloud.':'Active le module ci-dessus pour la recherche et les envois dans tes sites connectés.';
     $('#cloud-connection').textContent=bridgeReady?'Navigateur connecté · tes sessions restent sur les sites.':'CV, suivi, lettres et carte accessibles depuis ce lien.';

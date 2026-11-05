@@ -82,7 +82,7 @@ function renderHome(){
   const draft=jobs.find(j=>['nouvelle','preparee'].includes(j.status));
   if(draft) tasks.push(['Préparer ta candidature',draft.title+' · '+draft.company,`data-edit="${esc(draft.id)}"`,'Ouvrir le brouillon']);
   tasks.push(['Chercher sur les huit sites','Indeed France, France Travail, HelloWork et LinkedIn dans une seule liste.','data-go="offres"','Voir les offres']);
-  if(tasks.length<3) tasks.push(['Vérifier tes quatre CV','Choisis le profil qui correspond à chaque candidature.','data-go="cv"','Voir mes CV']);
+  if(tasks.length<3) tasks.push(['Vérifier tes CV','Choisis le profil qui correspond à chaque candidature.','data-go="cv"','Voir mes CV']);
   $('#todo').innerHTML=tasks.slice(0,3).map(([title,message,attr,cta],i)=>`<div class="task"><span class="task-number">0${i+1}</span><div><strong>${esc(title)}</strong><p>${esc(message)}</p><button ${attr}>${esc(cta)} ↗</button></div></div>`).join('');
   $('#latest').innerHTML=jobs.length?jobs.slice(0,4).map(jobRow).join(''):(state.feed.offers||[]).slice(0,4).map(o=>`<div class="job-row"><span class="company-icon">${esc(o.company.slice(0,2).toUpperCase())}</span><div class="job-title"><strong>${esc(o.title)}</strong><small>${esc(o.location)} · ${esc(date(o.posted))}</small></div><button class="secondary" data-prepare-offer="${esc(o.offer_id)}">Voir et préparer ↗</button></div>`).join('')||empty('Aucune offre en cache.','Ouvre la recherche puis actualise les offres des employeurs.');
 }
