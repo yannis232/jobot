@@ -50,6 +50,15 @@ La carte utilise OpenStreetMap dans le navigateur et `geo.api.gouv.fr` pour iden
 
 ## Entretien et mises à jour
 
+Si la connexion refuse le mot de passe, vérifie que l’identifiant est bien `jobbot`. Pour choisir un nouveau mot de passe, lance dans ta console privée :
+
+```sh
+cd ~/jobot
+python3.12 configure_pythonanywhere.py --domain toncompte.pythonanywhere.com --reset-password
+```
+
+Saisis et confirme le nouveau mot de passe, puis clique sur **Reload** dans Web et recharge la page de connexion. Les anciennes sessions sont invalidées et les CV ainsi que le suivi sont conservés. Une phrase de plusieurs mots convient si elle contient au moins 16 caractères. Ne communique pas ce mot de passe dans le chat.
+
 - Prolonge l’application gratuite depuis **Web** chaque mois, avant son expiration.
 - Conserve une copie de tes CV et exporte régulièrement ton suivi.
 - Pour mettre à jour le code : `git pull --ff-only` dans `~/jobot`, puis **Reload** dans Web. Les secrets et données placés hors du dépôt sont conservés.

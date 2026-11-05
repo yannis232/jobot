@@ -77,6 +77,28 @@ class CloudTests(unittest.TestCase):
         self.assertEqual(self.call('/')[0], 303)
         self.assertEqual(self.call('/healthz', token=False, host='internal-health')[0], 200)
 
+    def test_password_reset_keeps_data_and_invalidates_old_login_and_session(self):
+        home = app.DATA / 'home'
+        old_password = self.settings['JOBBOT_OWNER_PASSWORD']
+        private, data = configure('exemple.pythonanywhere.com', password=old_password, home=home)
+        (data / 'temoin.txt').write_text('à conserver')
+        self.settings = {**json.loads(private.read_text()), 'JOBBOT_OWNER_USERNAME': 'proprietaire'}
+        self.site = cloud.Cloud(self.settings)
+        self.assertEqual(self.login()[0], 303)
+        self.assertEqual(self.call('/api/state')[0], 200)
+        before = private.read_bytes()
+        with self.assertRaises(ValueError):
+            configure('exemple.pythonanywhere.com', password='trop court', home=home, reset_password=True)
+        self.assertEqual(private.read_bytes(), before)
+        new_password = 'Nouvelle phrase FICTIVE pour les tests'
+        configure('exemple.pythonanywhere.com', password=new_password, home=home, reset_password=True)
+        self.settings = {**json.loads(private.read_text()), 'JOBBOT_OWNER_USERNAME': 'proprietaire'}
+        self.site = cloud.Cloud(self.settings)
+        self.assertEqual(self.call('/api/state')[0], 401)
+        self.assertEqual(self.login(old_password)[0], 401)
+        self.assertEqual(self.login(new_password)[0], 303)
+        self.assertEqual((data / 'temoin.txt').read_text(), 'à conserver')
+
     def test_login_cookie_logout_and_expiration(self):
         self.assertEqual(self.login('incorrect')[0], 401)
         status, headers, body = self.login()

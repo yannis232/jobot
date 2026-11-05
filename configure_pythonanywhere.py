@@ -8,7 +8,7 @@ import secrets
 from pathlib import Path
 
 
-def configure(domain, password=None, home=None):
+def configure(domain, password=None, home=None, reset_password=False):
     if not re.fullmatch(r'[a-zA-Z0-9_-]+\.(?:eu\.)?pythonanywhere\.com', str(domain)):
         raise ValueError('Indique le domaine exact affiché dans ton onglet Web PythonAnywhere.')
     home = Path(home or Path.home()).resolve()
@@ -19,6 +19,9 @@ def configure(domain, password=None, home=None):
         # Une mise à jour ne change ni le mot de passe, ni la clé, ni les données.
         settings['JOBBOT_PUBLIC_ORIGIN'] = 'https://' + domain
     else:
+        settings = {'JOBBOT_PUBLIC_ORIGIN': 'https://' + domain, 'JOBBOT_OWNER_USERNAME': 'jobbot',
+                    'JOBBOT_DATA_DIR': str(data), 'JOBBOT_HOSTING_PROVIDER': 'pythonanywhere-free'}
+    if reset_password or 'JOBBOT_OWNER_PASSWORD' not in settings:
         if password is None:
             password = getpass.getpass('Choisis un mot de passe propre à JobBot (16 caractères minimum, invisible) : ')
             again = getpass.getpass('Confirme ce mot de passe : ')
@@ -26,9 +29,9 @@ def configure(domain, password=None, home=None):
                 raise ValueError('Les deux mots de passe diffèrent. Aucun fichier créé.')
         if len(password) < 16:
             raise ValueError('Utilise au moins 16 caractères. Aucun fichier créé.')
-        settings = {'JOBBOT_PUBLIC_ORIGIN': 'https://' + domain, 'JOBBOT_OWNER_USERNAME': 'jobbot',
-                    'JOBBOT_OWNER_PASSWORD': password, 'JOBBOT_SESSION_SECRET': secrets.token_urlsafe(48),
-                    'JOBBOT_DATA_DIR': str(data), 'JOBBOT_HOSTING_PROVIDER': 'pythonanywhere-free'}
+        settings['JOBBOT_OWNER_PASSWORD'] = password
+        # Une réinitialisation invalide aussi les anciennes sessions et tentatives.
+        settings['JOBBOT_SESSION_SECRET'] = secrets.token_urlsafe(48)
     private.parent.mkdir(parents=True, exist_ok=True)
     data.mkdir(parents=True, exist_ok=True)
     # L'ouverture avec mode 0600 évite une fenêtre où le secret serait lisible par d'autres comptes.
@@ -45,8 +48,9 @@ def configure(domain, password=None, home=None):
 def main():
     parser = argparse.ArgumentParser(description='Préparer JobBot sur le compte gratuit PythonAnywhere.')
     parser.add_argument('--domain', required=True, help='Domaine exact affiché dans Web, sans https://')
+    parser.add_argument('--reset-password', action='store_true', help='Choisir un nouveau mot de passe JobBot et révoquer les anciennes sessions, en conservant les données.')
     args = parser.parse_args()
-    private, data = configure(args.domain)
+    private, data = configure(args.domain, reset_password=args.reset_password)
     root = Path(__file__).resolve().parent
     print('Configuration privée enregistrée hors du dépôt. Aucun mot de passe affiché.')
     print('Stockage privé :', data)
