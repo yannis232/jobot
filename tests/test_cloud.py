@@ -12,6 +12,7 @@ from urllib.parse import urlencode
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import app
 import cloud
+from configure_pythonanywhere import configure
 from reportlab.pdfgen import canvas
 from pypdf import PdfReader
 
@@ -56,6 +57,19 @@ class CloudTests(unittest.TestCase):
     def test_fail_closed_without_private_settings_and_https(self):
         for changes in [{'JOBBOT_OWNER_PASSWORD': ''}, {'JOBBOT_SESSION_SECRET': ''}, {'JOBBOT_PUBLIC_ORIGIN': 'http://jobbot-test.example'}]:
             with self.assertRaises(ValueError): cloud.Cloud({**self.settings, **changes})
+
+    def test_free_host_configuration_preserves_private_credentials_and_data(self):
+        home = app.DATA / 'home'
+        private, data = configure('exemple.pythonanywhere.com', password='Mot de passe FICTIF pour les tests', home=home)
+        before = json.loads(private.read_text())
+        (data / 'temoin.txt').write_text('à conserver')
+        configure('exemple.pythonanywhere.com', home=home)
+        after = json.loads(private.read_text())
+        self.assertEqual(before['JOBBOT_SESSION_SECRET'], after['JOBBOT_SESSION_SECRET'])
+        self.assertEqual(before['JOBBOT_OWNER_PASSWORD'], after['JOBBOT_OWNER_PASSWORD'])
+        self.assertEqual((data / 'temoin.txt').read_text(), 'à conserver')
+        self.assertNotIn('jobot', str(private.relative_to(home)))
+        with self.assertRaises(ValueError): configure('https://exemple.pythonanywhere.com', password='x'*20, home=home)
 
     def test_every_private_route_is_locked_even_with_api_token(self):
         for path in ['/api/state', '/api/letter?id=1', '/cv/example.pdf', '/export.csv', '/api/extension.zip', '/.git/config', '/app.py']:

@@ -16,25 +16,21 @@ Le module se télécharge **depuis le site connecté**, dans « Connecter mon na
 
 Sur téléphone ou sans module : consultation, profil, CV, import d’une annonce par son lien lorsqu’elle est publiquement lisible, comparaisons, lettres et suivi restent accessibles. Le pilotage des huit sites et les envois dans les comptes connectés exigent un navigateur de bureau compatible et ouvert. Aucun traitement ne peut contacter les plateformes en utilisant un navigateur éteint.
 
-## Hébergement Render
+## Hébergement gratuit : PythonAnywhere
 
-Le fichier [render.yaml](render.yaml) prépare un service Python à Francfort, sur le plus petit plan payant compatible avec un disque persistant de 1 Go. **Un déploiement de cette configuration entraîne des frais Render, à vérifier et approuver avant l’application du plan.** Aucun service gratuit avec fichiers éphémères n’est proposé comme stockage durable pour les CV.
+La voie retenue est **PythonAnywhere Beginner à 0 $/mois**, avec une application web et 512 Mo de stockage privé. Le site doit être prolongé chaque mois depuis l’onglet Web du compte. Le serveur a un accès limité aux sites externes ; le module du navigateur conserve la lecture des plateformes connectées.
 
-[Préparer le déploiement sur Render](https://dashboard.render.com/blueprint/new?repo=https://github.com/yannis232/jobot)
+Le guide complet est dans [PYTHONANYWHERE.md](PYTHONANYWHERE.md). Il décrit la création du compte gratuit, l’installation depuis ce dépôt, la configuration du mot de passe invisible dans la console privée et le raccordement WSGI. Aucun fichier BAT ni PC serveur allumé ne sont nécessaires.
 
-Le déploiement démarre avec :
+Le mot de passe et la clé restent dans `~/.config/jobbot/settings.json`, hors de ce dépôt. Les CV et le suivi restent dans `~/jobbot-donnees`, également hors du dépôt et non exposés comme fichiers statiques. Une mise à jour conserve les secrets et les données.
 
-| Variable privée | Utilité |
-| --- | --- |
-| `JOBBOT_OWNER_USERNAME` | Identifiant du propriétaire, `jobbot` par défaut |
-| `JOBBOT_OWNER_PASSWORD` | Mot de passe propre à JobBot, 16 caractères minimum ; saisir dans Render, jamais dans le dépôt ou le chat |
-| `JOBBOT_SESSION_SECRET` | Clé de session générée par Render, 32 caractères minimum |
-| `JOBBOT_DATA_DIR` | `/var/data/jobbot`, sous le disque persistant |
-| `JOBBOT_PUBLIC_ORIGIN` | Facultative sur Render : son adresse HTTPS est obtenue depuis `RENDER_EXTERNAL_URL`. À fixer pour un domaine personnalisé |
+L’application refuse de démarrer sans adresse HTTPS et secrets valides. CV, exports, API et téléchargements exigent une session. Les cookies sont `Secure`, `HttpOnly` et `SameSite=Strict`. Les actions exigent l’origine exacte du site et le jeton de la page. Les échecs de connexion sont limités.
 
-L’application refuse de démarrer si son adresse HTTPS ou ses secrets privés ne sont pas correctement configurés. Les CV, exports, API et téléchargements exigent une session valide. Les cookies de session sont `Secure`, `HttpOnly` et `SameSite=Strict`. Les actions exigent l’origine exacte du site et le jeton de la page. Les échecs de connexion sont limités.
+Sources : [formule gratuite](https://www.pythonanywhere.com/pricing/) et [limites actuelles](https://help.pythonanywhere.com/pages/FreeAccountsFeatures/).
 
-Après déploiement, ouvre l’adresse `https://…onrender.com`, connecte-toi, ajoute tes CV, complète ton profil et installe une fois le module de navigateur si tu utilises les recherches et envois connectés. Il n’y a plus de fichier BAT à lancer.
+### Option Render facultative
+
+`render.yaml` conserve une configuration payante facultative, avec un disque persistant. **Elle n’est pas activée.** Aucun service payant n’a été créé. Ne l’appliquer que si un hébergement payant est explicitement souhaité et son coût accepté. La configuration gratuite décrite ci-dessus n’utilise pas Render.
 
 ## Développement et vérification
 
