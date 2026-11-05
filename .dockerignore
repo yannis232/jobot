@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+donnees
+data
+cv
+originaux
+vendor
+runtime
+__pycache__
+*.pdf
+*.sqlite*

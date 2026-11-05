@@ -1,0 +1,112 @@
+{
+  "manifest_version": 3,
+  "name": "JobBot Cloud · Mon navigateur",
+  "description": "Relie uniquement ton site JobBot privé aux pages d’emploi et aux messageries que tu utilises.",
+  "version": "8.0.0",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://example.invalid/*",
+    "https://fr.indeed.com/*",
+    "https://candidat.francetravail.fr/*",
+    "https://www.hellowork.com/*",
+    "https://hellowork.com/*",
+    "https://www.linkedin.com/*",
+    "https://fr.linkedin.com/*",
+    "https://www.bing.com/*",
+    "https://mail.yahoo.com/*",
+    "https://mail.google.com/*",
+    "https://www.meteojob.com/*",
+    "https://meteojob.com/*",
+    "https://www.adecco.com/*",
+    "https://www.manpower.fr/*",
+    "https://www.randstad.fr/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.yahoo.com/*",
+        "https://mail.google.com/*",
+        "https://www.linkedin.com/*",
+        "https://fr.linkedin.com/*"
+      ],
+      "js": [
+        "outgoing.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://example.invalid/*"
+      ],
+      "js": [
+        "bridge.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://fr.indeed.com/*",
+        "https://candidat.francetravail.fr/*",
+        "https://www.hellowork.com/*",
+        "https://hellowork.com/*",
+        "https://www.linkedin.com/*",
+        "https://fr.linkedin.com/*",
+        "https://www.meteojob.com/*",
+        "https://meteojob.com/*",
+        "https://www.adecco.com/*",
+        "https://www.manpower.fr/*",
+        "https://www.randstad.fr/*"
+      ],
+      "js": [
+        "extract.js",
+        "collector.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://fr.indeed.com/*",
+        "https://candidat.francetravail.fr/*",
+        "https://www.hellowork.com/*",
+        "https://hellowork.com/*",
+        "https://www.linkedin.com/*",
+        "https://fr.linkedin.com/*",
+        "https://www.bing.com/*",
+        "https://www.meteojob.com/*",
+        "https://meteojob.com/*",
+        "https://www.adecco.com/*",
+        "https://www.manpower.fr/*",
+        "https://www.randstad.fr/*"
+      ],
+      "js": [
+        "research.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://fr.indeed.com/*",
+        "https://candidat.francetravail.fr/*",
+        "https://www.hellowork.com/*",
+        "https://hellowork.com/*",
+        "https://www.linkedin.com/*",
+        "https://fr.linkedin.com/*",
+        "https://www.meteojob.com/*",
+        "https://meteojob.com/*",
+        "https://www.adecco.com/*",
+        "https://www.manpower.fr/*",
+        "https://www.randstad.fr/*"
+      ],
+      "js": [
+        "application.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

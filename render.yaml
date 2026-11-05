@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: jobbot-personnel
+    runtime: python
+    region: frankfurt
+    plan: 0.5c-512mb
+    buildCommand: pip install -r requirements.txt
+    startCommand: python cloud.py
+    healthCheckPath: /healthz
+    autoDeployTrigger: 'off'
+    disk:
+      name: jobbot-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.12
+      - key: JOBBOT_DATA_DIR
+        value: /var/data/jobbot
+      - key: JOBBOT_OWNER_USERNAME
+        value: jobbot
+      - key: JOBBOT_OWNER_PASSWORD
+        sync: false
+      - key: JOBBOT_SESSION_SECRET
+        generateValue: true
