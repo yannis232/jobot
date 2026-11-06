@@ -234,7 +234,7 @@ def receive(api, payload):
                     job.update(sent_cv=previous_cv, sent_files=previous_files)
                     job['followup_count'] = job.get('followup_count', 0) + 1
                     job['last_followup_at'] = api.now()
-                api.event(('Relance' if task.get('followup') else 'Candidature') + ' envoyée depuis JobBot via ' + task['provider'] + ' : ' + job['company'])
+                api.event(('Relance' if task.get('followup') else 'Candidature') + ' envoyée depuis MoneyScout via ' + task['provider'] + ' : ' + job['company'])
             else:
                 job.update(status='envoyee' if job.get('sent_at') else 'preparee', delivery_uncertain=False)
             api.update_internal(job)

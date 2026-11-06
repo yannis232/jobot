@@ -161,11 +161,11 @@ class CloudTests(unittest.TestCase):
         status, headers, data = self.call('/api/extension.zip')
         self.assertEqual(status, 200)
         with zipfile.ZipFile(io.BytesIO(data)) as z:
-            m = json.loads(z.read('JobBot_Cloud_Extension/manifest.json'))
+            m = json.loads(z.read('MoneyScout_Cloud_Extension/manifest.json'))
             self.assertIn(self.site.origin + '/*', m['host_permissions'])
             self.assertNotIn('https://example.invalid/*', m['host_permissions'])
             self.assertFalse(any('127.0.0.1' in h for h in m['host_permissions']))
-            self.assertIn(self.site.origin, z.read('JobBot_Cloud_Extension/cloud-origin.js').decode())
+            self.assertIn(self.site.origin, z.read('MoneyScout_Cloud_Extension/cloud-origin.js').decode())
             contents = '\n'.join(z.read(n).decode() for n in z.namelist())
             self.assertNotIn(self.settings['JOBBOT_OWNER_PASSWORD'], contents)
             self.assertNotIn(self.settings['JOBBOT_SESSION_SECRET'], contents)

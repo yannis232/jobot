@@ -1,4 +1,4 @@
-"""JobBot - application locale Windows, moteur et dependances fournis."""
+"""MoneyScout - application locale Windows, moteur et dependances fournis."""
 from __future__ import annotations
 
 import argparse
@@ -210,7 +210,7 @@ def crypt(value, decrypt=False):
     if decrypt:
         ok = crypto.CryptUnprotectData(ctypes.byref(src), None, None, None, None, 1, ctypes.byref(dst))
     else:
-        ok = crypto.CryptProtectData(ctypes.byref(src), 'JobBot', None, None, None, 1, ctypes.byref(dst))
+        ok = crypto.CryptProtectData(ctypes.byref(src), 'MoneyScout', None, None, None, 1, ctypes.byref(dst))
     if not ok:
         raise ValueError('Impossible de lire/enregistrer la clé sous ce compte Windows. Ressaisis-la.')
     try:
@@ -727,7 +727,7 @@ def public_text(url):
     url = public_url(url)
     if not url.startswith('https://'):
         raise ValueError('Une page source HTTPS est nécessaire.')
-    req = urllib.request.Request(url, headers={'User-Agent': 'JobBot/6.0 personal-job-search', 'Accept': 'text/html'})
+    req = urllib.request.Request(url, headers={'User-Agent': 'MoneyScout/6.0 personal-job-search', 'Accept': 'text/html'})
     with urllib.request.build_opener(PublicRedirect()).open(req, timeout=8) as response:
         data = response.read(2_000_001)
         if len(data) > 2_000_000 or 'html' not in response.headers.get('Content-Type', '').lower():
@@ -779,7 +779,7 @@ def parse_posting(text, url):
 
 def import_url(url):
     url = public_url(url)
-    req = urllib.request.Request(url, headers={'User-Agent': 'JobBot/6.0 (personal job tracking)', 'Accept': 'text/html'})
+    req = urllib.request.Request(url, headers={'User-Agent': 'MoneyScout/6.0 (personal job tracking)', 'Accept': 'text/html'})
     try:
         with urllib.request.build_opener(PublicRedirect()).open(req, timeout=25) as res:
             data = res.read(3_000_001)
@@ -792,7 +792,7 @@ def import_url(url):
 
 
 def gmail_compose_link(job):
-    """Ouvre Yahoo ou Gmail, sans authentification ni envoi par JobBot."""
+    """Ouvre Yahoo ou Gmail, sans authentification ni envoi par MoneyScout."""
     recipient = job.get('email', '')
     if not valid_email(recipient) or any(w in recipient.lower().split('@')[0] for w in ('noreply', 'no-reply', 'donotreply')):
         raise ValueError('Indique une adresse de recrutement publiée dans l’annonce.')
@@ -834,7 +834,7 @@ def mark_manual_sent(job_id, followup=False):
     job['manual_send'] = True
     job['next_followup'] = (datetime.now(timezone.utc) + timedelta(days=config(public=True)['reminder_days'])).isoformat(timespec='seconds')
     update_internal(job)
-    event(('Relance déclarée envoyée hors JobBot : ' if followup else 'Candidature déclarée envoyée hors JobBot : ') + job['company'])
+    event(('Relance déclarée envoyée hors MoneyScout : ' if followup else 'Candidature déclarée envoyée hors MoneyScout : ') + job['company'])
     return job
 
 
@@ -945,7 +945,7 @@ def send_job(job_id, followup=False):
         update_internal(job)
         event(('Relance envoyée à ' if followup else 'Candidature envoyée à ') + job['company'])
         try:
-            notify('JobBot : ' + ('relance' if followup else 'candidature') + ' envoyée à ' + job['company'])
+            notify('MoneyScout : ' + ('relance' if followup else 'candidature') + ' envoyée à ' + job['company'])
         except Exception:
             event('Email envoyé ; notification Telegram non transmise.')
         return job
@@ -987,7 +987,7 @@ def check_mail():
                 matched += 1
                 event('Réponse ou accusé de réception détecté : ' + job['company'])
                 try:
-                    notify('JobBot : nouveau message lié à ta candidature chez ' + job['company'] + '. Consulte ta messagerie.')
+                    notify('MoneyScout : nouveau message lié à ta candidature chez ' + job['company'] + '. Consulte ta messagerie.')
                 except Exception:
                     event('Notification Telegram non transmise.')
     return {'matched': matched, 'message': f'{matched} réponse(s) ou accusé(s) de réception détecté(s). Les réponses sans référence au message initial restent à vérifier dans ta messagerie.'}
@@ -1023,7 +1023,7 @@ def export_csv():
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = 'JobBot/8.0.0'
+    server_version = 'MoneyScout/8.0.0'
 
     def log_message(self, fmt, *args):
         pass  # Les URLs, messages et cles ne sont pas ecrits dans le terminal.
@@ -1047,7 +1047,7 @@ class Handler(BaseHTTPRequestHandler):
         path = urllib.parse.urlsplit(self.path)
         if path.path in ('/api/state', '/api/search/state', '/api/enrich/tasks', '/api/letter', '/api/outbox/task', '/api/cv/adapted'):
             if self.headers.get('X-JobBot-Token') != TOKEN:
-                return self.reply({'error': 'Recharge la page JobBot.'}, 403)
+                return self.reply({'error': 'Recharge la page MoneyScout.'}, 403)
             if path.path == '/api/cv/adapted':
                 try:
                     job = get_job(urllib.parse.parse_qs(path.query).get('id', [''])[0])
@@ -1099,7 +1099,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         expected_origin = f'http://127.0.0.1:{self.server.server_port}'
         if not self.local_request() or self.headers.get('X-JobBot-Token') != TOKEN or self.headers.get('Origin', expected_origin) != expected_origin:
-            return self.reply({'error': 'Recharge la page JobBot.'}, 403)
+            return self.reply({'error': 'Recharge la page MoneyScout.'}, 403)
         try:
             length = int(self.headers.get('Content-Length', 0))
             if length < 1 or length > 12_000_000:
@@ -1234,12 +1234,12 @@ class Handler(BaseHTTPRequestHandler):
             if path == '/api/profile':
                 return self.reply(save_profile(payload))
             if path in ('/api/test-gmail', '/api/test-email'):
-                msg = create_message({'title': 'Test', 'subject': 'Test JobBot', 'body': 'Ton JobBot peut envoyer des emails avec ton CV en pièce jointe.', 'profile': 'polyvalent'}, test=True)
+                msg = create_message({'title': 'Test', 'subject': 'Test MoneyScout', 'body': 'Ton MoneyScout peut envoyer des emails avec ton CV en pièce jointe.', 'profile': 'polyvalent'}, test=True)
                 smtp_send(msg)
                 event('Test messagerie envoyé à ta propre adresse.')
                 return self.reply({'message': 'Email de test envoyé à ta propre adresse avec le CV employé polyvalent.'})
             if path == '/api/test-telegram':
-                if not notify('JobBot : les notifications sont connectées.'):
+                if not notify('MoneyScout : les notifications sont connectées.'):
                     raise ValueError('Renseigne le jeton du bot et le chat Telegram.')
                 return self.reply({'message': 'Notification Telegram envoyée.'})
             if path == '/api/check-mail':
@@ -1270,8 +1270,8 @@ def main():
     except OSError:
         server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
     url = f'http://127.0.0.1:{server.server_port}/?v={BUILD}#offres'
-    print('JobBot v' + BUILD + ' est ouvert : ' + url)
-    print('Garde cette fenetre ouverte. Ferme-la pour arreter JobBot.')
+    print('MoneyScout v' + BUILD + ' est ouvert : ' + url)
+    print('Garde cette fenetre ouverte. Ferme-la pour arreter MoneyScout.')
     if not args.no_browser and os.environ.get('JOBBOT_NO_BROWSER') != '1':
         try:
             boards.open_browser(ROOT, DATA, url)

@@ -1,4 +1,4 @@
-# Hébergement gratuit de JobBot
+# Hébergement gratuit de MoneyScout
 
 L’offre **Beginner à 0 $/mois** permet une application web avec stockage privé de 512 Mo. L’application doit être prolongée chaque mois depuis l’onglet Web du compte. Le serveur n’a accès qu’à certains sites externes ; les recherches et les envois connectés passent donc par le module de ton navigateur. Les CV et le suivi restent sur le disque privé du compte, hors de GitHub.
 
@@ -28,7 +28,7 @@ Dans ta console Bash, depuis le dossier `jobot`, lance :
 python3.12 configure_pythonanywhere.py --domain toncompte.pythonanywhere.com
 ```
 
-Remplace le domaine d’exemple par celui de ton onglet Web. Le programme te demande de choisir et confirmer un mot de passe propre à JobBot, de 6 caractères minimum. Il reste invisible à l’écran. Ne le mets ni dans le chat, ni dans GitHub, ni dans la commande.
+Remplace le domaine d’exemple par celui de ton onglet Web. Le programme te demande de choisir et confirmer un mot de passe propre à MoneyScout, de 6 caractères minimum. Il reste invisible à l’écran. Ne le mets ni dans le chat, ni dans GitHub, ni dans la commande.
 
 La configuration privée est écrite dans `~/.config/jobbot/settings.json` et les données dans `~/jobbot-donnees`. Ces dossiers restent hors du dépôt et ne sont pas exposés comme fichiers statiques. Une nouvelle exécution conserve le mot de passe et les données existants.
 
@@ -42,11 +42,11 @@ N’ajoute pas de correspondance de fichiers statiques pour `/`, `/cv`, le dossi
 
 ## 4. Utiliser ton lien
 
-Ouvre l’adresse HTTPS de ton onglet Web. L’identifiant JobBot est `jobbot` ; utilise le mot de passe choisi dans ta console privée. Ajoute tes CV et ton profil depuis ce site connecté.
+Ouvre l’adresse HTTPS de ton onglet Web. L’identifiant MoneyScout est `jobbot` ; utilise le mot de passe choisi dans ta console privée. Ajoute tes CV et ton profil depuis ce site connecté.
 
 Le démarrage demande seulement le métier et la ville. Le CV est facultatif pour commencer. **Trouver des offres** lance la lecture publique depuis l’hébergement, sans module et sans compte sur les plateformes. L’accès gratuit de PythonAnywhere est limité : certains sites refusent cette lecture et sont signalés. La première page est lue, jusqu’à 30 annonces par source, avec un cache de 10 minutes. Aucun résultat exhaustif n’est promis.
 
-Pour envoyer sans module, prépare les PDF et le brouillon puis termine dans la messagerie ou sur l’annonce. Pour le pilotage facultatif du navigateur : **Options avancées → Navigateur connecté**, ouvre le détail du module et télécharge-le. Installe le dossier dans Opera ou Chrome en mode développeur, recharge JobBot puis connecte-toi seulement aux sites qui le demandent pour tes actions. Le module est limité à l’adresse exacte du site.
+Pour envoyer sans module, prépare les PDF et le brouillon puis termine dans la messagerie ou sur l’annonce. Pour le pilotage facultatif du navigateur : **Options avancées → Navigateur connecté**, ouvre le détail du module et télécharge-le. Installe le dossier dans Opera ou Chrome en mode développeur, recharge MoneyScout puis connecte-toi seulement aux sites qui le demandent pour tes actions. Le module est limité à l’adresse exacte du site.
 
 La carte utilise OpenStreetMap dans le navigateur et `geo.api.gouv.fr` pour identifier les communes ; ce dernier figure dans la liste d’accès autorisés de l’hébergement gratuit au moment de la préparation. L’import direct de certaines pages d’employeur et la vérification de coordonnées peuvent être limités par l’offre gratuite ou par le site lui-même. Le module peut lire les descriptions affichées ; une source inaccessible doit rester signalée comme telle.
 

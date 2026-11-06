@@ -133,7 +133,7 @@
     const path=new URL(url).pathname;
     if(/authwall|checkpoint|\/login|\/uas\//.test(path))return 'Connecte-toi dans cet onglet, puis reviens cliquer sur Reprendre ce site.';
     const body=text(doc.body).slice(0,20000);
-    if(/requête bloquée|request blocked|vous avez été bloqué|you have been blocked/i.test(body))return 'Le site bloque l’accès à cette recherche. Ouvre l’onglet pour consulter sa demande. Les autres recherches continuent ; JobBot ne peut pas lire ce site tant que l’accès est refusé.';
+    if(/requête bloquée|request blocked|vous avez été bloqué|you have been blocked/i.test(body))return 'Le site bloque l’accès à cette recherche. Ouvre l’onglet pour consulter sa demande. Les autres recherches continuent ; MoneyScout ne peut pas lire ce site tant que l’accès est refusé.';
     if(/verify (?:that )?you are human|vérifi(?:ez|cation).{0,60}(?:humain|sécurité)|unusual activity|activité inhabituelle|access denied|accès refusé|just a moment|captcha/i.test(body))return 'Le site demande une vérification. Termine-la toi-même dans cet onglet puis reprends la lecture.';
     if(doc.querySelector('input[type="password"]')&&!doc.querySelector('a[href*="/jobs/view/"]')&&source==='linkedin')return 'LinkedIn demande une connexion. Connecte-toi dans cet onglet puis reprends la lecture.';
     return '';

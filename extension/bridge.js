@@ -11,7 +11,7 @@
     try{
       const response=await chrome.runtime.sendMessage({...payload,kind:command,accountScope});
       publish({kind:'response',id,result:response});
-    }catch{publish({kind:'response',id,result:{error:'Le navigateur JobBot doit être rouvert depuis le programme.'}});}
+    }catch{publish({kind:'response',id,result:{error:'Le navigateur MoneyScout doit être rouvert depuis le programme.'}});}
   });
   chrome.runtime.onMessage.addListener((message,sender,respond)=>{
     if(message.kind==='DELIVERY_CHECK'){

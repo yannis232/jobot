@@ -8,7 +8,7 @@
     const keys={meteojob:['what','where'],adecco:['jobTitle','jobLocation'],manpower:[],randstad:[],indeed:['q','l'],francetravail:['motsCles','lieux'],hellowork:['k','l'],linkedin:['keywords','location']}[job.source];
     if(keys.some(key=>current.searchParams.has(key)&&current.searchParams.get(key).toLowerCase()!==expected.searchParams.get(key)?.toLowerCase())){
       const signature='criteria-changed';
-      if(last!==signature){last=signature;send({status:'unavailable',offers:[],message:'Les critères ont été changés dans cet onglet. Relance une recherche depuis JobBot pour les garder identiques sur les huit sites.'});}
+      if(last!==signature){last=signature;send({status:'unavailable',offers:[],message:'Les critères ont été changés dans cet onglet. Relance une recherche depuis MoneyScout pour les garder identiques sur les huit sites.'});}
       return;
     }
     if(job.source==='adecco'&&adeccoRows===null&&document.querySelector('.job-cards article')){

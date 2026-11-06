@@ -1,4 +1,4 @@
-# JobBot Cloud
+# MoneyScout Cloud
 
 Des comptes personnels pour comparer des offres à ses CV, adapter un CV et une lettre, retrouver les offres sur une carte et suivre ses candidatures et relances. Un même lien peut être partagé avec des amis : chacun crée son compte et utilise son propre espace.
 
@@ -33,7 +33,7 @@ Le compte d’origine `jobbot` et ses données sont conservés lors de la mise �
 
 Pour rester adapté aux 512 Mo gratuits, la configuration par défaut accepte **12 comptes au total**, avec un budget de 20 Mo par nouveau compte et 50 Mo pour le compte d’origine. Les enregistrements sont freinés à l’approche de ce budget et l’espace utilisé s’affiche dans le site. Les limites peuvent être ajustées par l’hébergeur avec `JOBBOT_MAX_ACCOUNTS` et `JOBBOT_USER_QUOTA_MB`, sans changer les données existantes. Ne pas ouvrir le service à un public important sur cette offre limitée.
 
-Le mode simple ne prétend pas envoyer dans des comptes tiers : les PDF et brouillons se préparent dans JobBot, puis l’utilisateur termine l’envoi sur le site ou dans sa messagerie. Les contacts LinkedIn restent à rechercher/vérifier manuellement sans module.
+Le mode simple ne prétend pas envoyer dans des comptes tiers : les PDF et brouillons se préparent dans MoneyScout, puis l’utilisateur termine l’envoi sur le site ou dans sa messagerie. Les contacts LinkedIn restent à rechercher/vérifier manuellement sans module.
 
 L’application refuse de démarrer sans adresse HTTPS et secrets valides. CV, exports, API et téléchargements exigent une session. Les cookies sont `Secure`, `HttpOnly` et `SameSite=Strict`. Les actions exigent l’origine exacte du site et le jeton de la page. Les échecs de connexion sont limités.
 
@@ -62,3 +62,9 @@ La bibliothèque Leaflet conserve sa licence dans [web/LEAFLET-LICENSE.txt](web/
 ## GitHub Pages
 
 Le dépôt est hébergé sur GitHub. GitHub Pages sert des fichiers statiques et ne peut pas exécuter ce serveur Python ni conserver ses comptes et CV privés. Héberger l’interface sur Pages demanderait toujours un serveur distinct pour ces fonctions.
+
+## Connexions aux plateformes
+
+MoneyScout est le nouveau nom du produit. Les identifiants de compte, variables `JOBBOT_*`, cookies, en-têtes `X-JobBot-*` et dossiers privés historiques sont conservés pour éviter toute migration de données ou rupture des modules installés. Les nouveaux téléchargements portent le nom MoneyScout.
+
+La page Mes comptes regroupe les accès officiels et une préférence de messagerie propre à chaque compte. Ouvrir une page ne prouve pas une authentification ; aucun état connecté n’est inventé. Les mots de passe des plateformes ne sont ni demandés dans cette page ni enregistrés. Une connexion OAuth de messagerie exige une application Google/Yahoo autorisée et configurée : elle n’est pas active dans cette version. Un navigateur distant serait un projet d’hébergement distinct ; aucun service payant n’a été créé.

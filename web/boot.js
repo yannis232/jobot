@@ -6,7 +6,7 @@
     var box = document.getElementById('startup-error');
     var text = document.getElementById('startup-error-text');
     if (box && text) {
-      text.textContent = message || 'Ferme les anciennes fenêtres de JobBot et relance ton lien JobBot depuis le dossier VERSION 8.0.0.';
+      text.textContent = message || 'Ferme les anciennes fenêtres de MoneyScout et relance ton lien MoneyScout depuis le dossier VERSION 8.0.0.';
       box.hidden = false;
     }
   };
@@ -34,7 +34,7 @@
     }
   }, true);
   timer = window.setTimeout(function () {
-    if (!window.JobBotReady) window.showJobBotError('JobBot met trop de temps à démarrer. Reconnecte-toi depuis le fichier ton lien JobBot de la version 8.0.0.');
+    if (!window.JobBotReady) window.showJobBotError('MoneyScout met trop de temps à démarrer. Reconnecte-toi depuis le fichier ton lien MoneyScout de la version 8.0.0.');
   }, 12000);
   window.addEventListener('jobbot-ready', function () { window.clearTimeout(timer); });
 })();

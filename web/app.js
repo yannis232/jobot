@@ -4,7 +4,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const token = $('meta[name="jobbot-token"]').content;
 const labels = {nouvelle:'À étudier',preparee:'Brouillon prêt',envoyee:'Envoyée',reponse:'Réponse reçue',entretien:'Entretien',refus:'Refus',archivee:'Archivée',envoi_incertain:'Envoi à vérifier'};
-const names = {bienvenue:'Démarrage',accueil:'Tableau de bord',offres:'Trouver des offres',yahoo:'Messagerie',suivi:'Mes candidatures',contacts:'Contacts LinkedIn',cv:'Mes CV et mon profil',connexions:'Connexions',carte:'Carte des offres',relances:'Relances',guide:'Premiers pas'};
+const names = {bienvenue:'Démarrage',accueil:'Tableau de bord',offres:'Trouver des offres',yahoo:'Messagerie',suivi:'Mes candidatures',contacts:'Contacts LinkedIn',cv:'Mes CV et mon profil',connexions:'Mes comptes',carte:'Carte des offres',relances:'Relances',guide:'Premiers pas'};
 const keywords = ['employé polyvalent','préparateur de commandes','employé libre-service','agent logistique','manutentionnaire','technicien informatique','support informatique','alternance systèmes réseaux'];
 let state = {jobs:[],profiles:{},config:{},events:[],profile:{},feed:{offers:[]},contacts:[]};
 let currentJob = null;
@@ -37,7 +37,7 @@ async function api(path,payload){
   const timer=path==='/api/state'?setTimeout(()=>controller.abort(),15000):null;
   try{
     const response=await fetch(path,{method:payload===undefined?'GET':'POST',headers:{'Content-Type':'application/json','X-JobBot-Token':token},body:payload===undefined?undefined:JSON.stringify(payload),signal:controller.signal});
-    if(!(response.headers.get('content-type')||'').includes('application/json')) throw new Error('Cette fenêtre ne communique pas avec la version actuelle de JobBot. Relance ton lien JobBot du nouveau dossier.');
+    if(!(response.headers.get('content-type')||'').includes('application/json')) throw new Error('Cette fenêtre ne communique pas avec la version actuelle de MoneyScout. Relance ton lien MoneyScout du nouveau dossier.');
     const data=await response.json();
     if(!response.ok) throw new Error(data.error||'L’action a échoué.');
     return data;
@@ -48,7 +48,7 @@ async function run(button,action){
   if(button?.disabled) return;
   if(button) button.disabled=true;
   try {return await action();}
-  catch(error){toast(error.message||'Connexion à JobBot interrompue. Vérifie sa fenêtre de lancement.',true);}
+  catch(error){toast(error.message||'Connexion à MoneyScout interrompue. Vérifie sa fenêtre de lancement.',true);}
   finally {if(button) button.disabled=false;}
 }
 
@@ -130,21 +130,21 @@ function renderYahoo(){
   }
   const configured=Boolean(state.config.yahoo_password_configured);
   const verified=Boolean(state.config.yahoo_verified_at&&state.config.yahoo_verified_address===state.config.yahoo_address);
-  form.elements.yahoo_password.placeholder=configured?'Déjà enregistré · laisse vide pour conserver':'Mot de passe créé pour JobBot';
+  form.elements.yahoo_password.placeholder=configured?'Déjà enregistré · laisse vide pour conserver':'Mot de passe créé pour MoneyScout';
   $('#yahoo-connection-state').textContent=verified?'Connexion vérifiée':configured?'Enregistrée · à vérifier':'À configurer';
   $('#yahoo-connection-state').classList.toggle('reply',verified);
   $('#yahoo-connect-result').textContent=verified?'Connexion vérifiée le '+new Date(state.config.yahoo_verified_at).toLocaleString('fr-FR')+'. Aucun email n’est envoyé par ce test.':configured?'Un mot de passe est enregistré. Clique sur Connecter Yahoo et vérifier.':'Renseigne ton adresse et le mot de passe d’application Yahoo pour connecter les envois.';
 }
 
 function acceptState(next){
-  if(next.build!==APP_BUILD) throw new Error('Une ancienne version de JobBot répond à cette fenêtre. Ferme-la puis relance ton lien JobBot dans le dossier JobBot Cloud.');
+  if(next.build!==APP_BUILD) throw new Error('Une ancienne version de MoneyScout répond à cette fenêtre. Ferme-la puis relance ton lien MoneyScout dans le dossier MoneyScout Cloud.');
   state={...state,...next,feed:next.feed||{offers:[],city:'Lyon',sources:{},errors:[]},contacts:next.contacts||[]};
 }
 
 function renderAll(){
   const warnings=[...(state.warnings||[])];
   for(const [name,render] of [['les offres',renderFeed],['Yahoo',renderYahoo],['le tableau de bord',renderHome],['le suivi',renderJobs],['les CV',renderCV],['les connexions',renderConfig],['les contacts',renderContacts]]){
-    try{render();}catch(error){console.error('Affichage JobBot : '+name,error);warnings.push('L’écran '+name+' n’a pas pu être affiché. Les autres rubriques restent accessibles.');}
+    try{render();}catch(error){console.error('Affichage MoneyScout : '+name,error);warnings.push('L’écran '+name+' n’a pas pu être affiché. Les autres rubriques restent accessibles.');}
   }
   window.JobBotWorkspace?.renderSetup();
   window.JobBotMatching?.controls();
@@ -241,7 +241,7 @@ $('#open-gmail').addEventListener('click',()=>{
     try{
       const job=await saveForm();
       const result=await api('/api/gmail-link',{id:job.id});
-      if(!tab) throw new Error('Autorise l’ouverture d’un nouvel onglet pour JobBot, puis recommence.');
+      if(!tab) throw new Error('Autorise l’ouverture d’un nouvel onglet pour MoneyScout, puis recommence.');
       tab.location.href=result.url;
       toast(mailLabel()+' ouvert. Vérifie le compte expéditeur, joins le CV téléchargé, puis envoie depuis ta messagerie.');
     }catch(error){if(tab) tab.close();throw error;}
@@ -350,7 +350,7 @@ async function refreshFeed(){
     await bridgeCall('START',{search_id:feed.search_id,sites:Object.entries(feed.sources).filter(([,s])=>s.url).map(([id,s])=>({id,url:s.url}))},20000);
     toast('Recherche lancée en parallèle sur les huit sites. Les offres arrivent ici.');
   }catch(error){
-    await Promise.all(Object.keys(sites).filter(id=>feed.sources[id]?.url).map(source_id=>api('/api/search/results',{search_id:feed.search_id,source_id,status:'unavailable',offers:[],message:'Le navigateur n’a pas démarré la lecture. Rouvre la fenêtre Opera JobBot.'})));
+    await Promise.all(Object.keys(sites).filter(id=>feed.sources[id]?.url).map(source_id=>api('/api/search/results',{search_id:feed.search_id,source_id,status:'unavailable',offers:[],message:'Le navigateur n’a pas démarré la lecture. Rouvre la fenêtre Opera MoneyScout.'})));
     adoptFeed(await api('/api/search/state'));throw error;
   }
 }
@@ -373,7 +373,7 @@ function renderSiteProgress(){
 function bridgeCall(command,payload={},timeout=4000){
   const id=++bridgeSequence;
   return new Promise((resolve,reject)=>{
-    const timer=setTimeout(()=>{bridgePending.delete(id);reject(new Error('Ouvre JobBot avec ton lien JobBot ou le bouton Ouvrir la fenêtre Opera JobBot.'));},timeout);
+    const timer=setTimeout(()=>{bridgePending.delete(id);reject(new Error('Ouvre MoneyScout avec ton lien MoneyScout ou le bouton Ouvrir la fenêtre Opera MoneyScout.'));},timeout);
     bridgePending.set(id,{resolve,reject,timer});
     window.postMessage({channel:'jobbot-request',id,command,payload},location.origin);
   });
@@ -384,11 +384,11 @@ function adoptFeed(feed){
 }
 async function connectBridge(automatic=true){
   const result=await bridgeCall('HELLO',{search_id:state.feed.search_id,pause_enrichment:state.config.auto_enrich===false||!state.config.onboarding_done});
-  if(result.version!==APP_BUILD)throw new Error('Rouvre JobBot depuis le dossier VERSION 8.0.0.');
+  if(result.version!==APP_BUILD)throw new Error('Rouvre MoneyScout depuis le dossier VERSION 8.0.0.');
   const accountScope=document.querySelector('meta[name="jobbot-account"]')?.content;
   if(accountScope&&result.account_scope!==accountScope)throw new Error('Mets à jour le module pour utiliser les comptes personnels : Connecter mon navigateur → Télécharger le module, puis remplace l’ancien module dans Opera.');
   bridgeReady=true;bridgeSearchId=result.search_id||'';
-  $('#browser-status').textContent='Navigateur JobBot connecté · les quatre recherches peuvent démarrer ensemble.';
+  $('#browser-status').textContent='Navigateur MoneyScout connecté · les quatre recherches peuvent démarrer ensemble.';
   $('#open-jobbot-browser').hidden=true;
   const launch=new URLSearchParams(location.search).get('launch')==='1';
   if(automatic&&!autoStarted&&window.JobBotReady&&state.config.onboarding_done&&(launch||(state.auto_search&&(!state.feed.search_id||bridgeSearchId!==state.feed.search_id)))){
@@ -462,7 +462,7 @@ document.addEventListener('click',event=>{
   if(event.target.closest('[data-reset-feed]')) resetFeedFilters();
   const siteButton=event.target.closest('[data-site-open],[data-site-resume]');
   if(siteButton)run(siteButton,async()=>{
-    if(!bridgeReady)throw new Error('Utilise la fenêtre Opera JobBot pour retrouver les onglets de recherche.');
+    if(!bridgeReady)throw new Error('Utilise la fenêtre Opera MoneyScout pour retrouver les onglets de recherche.');
     await bridgeCall(siteButton.dataset.siteResume?'RESUME':'FOCUS',{search_id:state.feed.search_id,source_id:siteButton.dataset.siteResume||siteButton.dataset.siteOpen});
   });
   const prepare=event.target.closest('[data-prepare-offer]');
@@ -486,7 +486,7 @@ document.addEventListener('click',event=>{
           toast('Dossier préparé. Termine le formulaire employeur et joins le CV avant de confirmer l’envoi ici.');
         }else{
           if(tab)tab.close();
-          toast(result.kind==='existing'?'Cette candidature est déjà dans ton suivi.':'Dossier prêt. Relis le contact et la lettre, puis choisis l’envoi depuis JobBot ou ta messagerie.');
+          toast(result.kind==='existing'?'Cette candidature est déjà dans ton suivi.':'Dossier prêt. Relis le contact et la lettre, puis choisis l’envoi depuis MoneyScout ou ta messagerie.');
         }
       }catch(error){if(tab)tab.close();throw error;}
     });
@@ -540,7 +540,7 @@ $('#open-linkedin-message').addEventListener('click',()=>{
       if(copied) await copied;
       else throw new Error('Utilise Ctrl+C pour copier le texte, puis ouvre le profil LinkedIn.');
       const url=saved.profile_url||('https://www.linkedin.com/search/results/people/?keywords='+encodeURIComponent(saved.name+' '+saved.company));
-      if(!tab) throw new Error('Autorise l’ouverture d’un onglet pour JobBot, puis recommence.');
+      if(!tab) throw new Error('Autorise l’ouverture d’un onglet pour MoneyScout, puis recommence.');
       tab.location.href=url;
       toast('Message copié. Dans LinkedIn, clique sur Message ou InMail, colle le texte et termine l’envoi.');
     }catch(error){if(tab)tab.close();throw error;}
@@ -570,11 +570,11 @@ async function startup(force=false){
     connectBridge().catch(()=>{
       if(bridgeReady)return;
       if(window.JobBotCloud){$('#browser-status').textContent='Mode simple · aucune installation ni connexion aux plateformes pour lancer la recherche.';$('#open-jobbot-browser').hidden=true;return;}
-      $('#browser-status').textContent='La recherche intégrée utilise la fenêtre Opera JobBot. Ouvre-la avec le bouton ci-dessous.';
+      $('#browser-status').textContent='La recherche intégrée utilise la fenêtre Opera MoneyScout. Ouvre-la avec le bouton ci-dessous.';
       $('#open-jobbot-browser').hidden=false;
     });
   }catch(error){
-    window.showJobBotError(error.name==='AbortError'?'Le programme ne répond pas. Ferme les anciennes fenêtres et relance ton lien JobBot du dossier VERSION 8.0.0.':error.message);
+    window.showJobBotError(error.name==='AbortError'?'Le programme ne répond pas. Ferme les anciennes fenêtres et relance ton lien MoneyScout du dossier VERSION 8.0.0.':error.message);
   }
 }
 $('#retry-startup').addEventListener('click',()=>startup(true));

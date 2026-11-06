@@ -35,7 +35,7 @@ test('switching accounts clears old tasks and cached CV attachments', async () =
   await app.call({ kind: 'HELLO', accountScope: b });
   assert.equal(Object.keys(app.storage.jobbotDeliveries).length, 0);
   assert.equal((await app.call({ kind: 'DELIVERY_READY' }, reader)).ignored, true);
-  await assert.rejects(app.call({ kind: 'DELIVERY_SEND', id: task.id, nonce: task.nonce, accountScope: a }), /compte JobBot a changé/);
+  await assert.rejects(app.call({ kind: 'DELIVERY_SEND', id: task.id, nonce: task.nonce, accountScope: a }), /compte .* a changé/);
   const result = await app.call({ kind: 'DELIVERY_SEND', id: task.id, nonce: task.nonce, accountScope: b });
   assert.equal(result.not_clicked, true);
 });

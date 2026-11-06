@@ -11,11 +11,11 @@ const storeResearch=()=>chrome.storage.session.set({research});
 const LOGIN_URLS={indeed:'https://secure.indeed.com/auth',francetravail:'https://candidat.francetravail.fr/espacepersonnel/',hellowork:'https://www.hellowork.com/fr-fr/',linkedin:'https://www.linkedin.com/login',gmail:'https://mail.google.com/',yahoo:'https://mail.yahoo.com/',meteojob:'https://www.meteojob.com/',adecco:'https://www.adecco.com/fr-fr',manpower:'https://www.manpower.fr/',randstad:'https://www.randstad.fr/'};
 
 async function deliverWork(work,payload){
-  if(work.accountScope!==activeAccount)throw new Error('Le compte JobBot a changé.');
-  if(!research.owner)throw new Error('La fenêtre JobBot est fermée.');
+  if(work.accountScope!==activeAccount)throw new Error('Le compte MoneyScout a changé.');
+  if(!research.owner)throw new Error('La fenêtre MoneyScout est fermée.');
   const response=await chrome.tabs.sendMessage(research.owner,{kind:'ENRICH_UPDATE',payload:{task_id:work.id,...payload}});
-  if(work.accountScope!==activeAccount)throw new Error('Le compte JobBot a changé.');
-  if(response?.error)throw new Error('Le serveur JobBot n’a pas enregistré le résultat.');
+  if(work.accountScope!==activeAccount)throw new Error('Le compte MoneyScout a changé.');
+  if(response?.error)throw new Error('Le serveur MoneyScout n’a pas enregistré le résultat.');
 }
 function workURL(work){
   try{
@@ -56,7 +56,7 @@ async function pumpWork(){
         const tab=await chrome.tabs.create({url:work.url,active:false});
         record.tab_id=tab.id;await storeResearch();
         if(record.kind!=='detail')setTimeout(async()=>{
-          if(research.active[record.id]&&!record.reader_ready)await finishWork(record,{status:'needs_user',message:'Opera bloque la lecture des résultats de recherche. Dans Démarrage > Tes sites d’emploi, ouvre les réglages du module JobBot et autorise l’accès aux résultats de recherche, puis relance cette fiche.'});
+          if(research.active[record.id]&&!record.reader_ready)await finishWork(record,{status:'needs_user',message:'Opera bloque la lecture des résultats de recherche. Dans Démarrage > Tes sites d’emploi, ouvre les réglages du module MoneyScout et autorise l’accès aux résultats de recherche, puis relance cette fiche.'});
         },9000);
       }catch{delete research.active[work.id];await storeResearch();}
     }
@@ -127,13 +127,13 @@ async function start(message,sender){
 async function handle(message,sender){
   await initialized;
   if(isApp(sender)){
-    if(!/^[a-f0-9]{64}$/.test(message.accountScope||''))throw new Error('Recharge ton JobBot et mets à jour son module de navigateur.');
+    if(!/^[a-f0-9]{64}$/.test(message.accountScope||''))throw new Error('Recharge ton MoneyScout et mets à jour son module de navigateur.');
     if(message.kind==='HELLO'&&activeAccount!==message.accountScope){
       task=null;research={owner:null,queue:[],active:{},paused:false,blocked_hosts:[]};
       await resetDeliveryAccount();activeAccount=message.accountScope;
       await chrome.storage.session.set({task,research,jobbotAccount:activeAccount});
     }
-    if(activeAccount!==message.accountScope)throw new Error('Le compte JobBot a changé. Recharge la page avant de continuer.');
+    if(activeAccount!==message.accountScope)throw new Error('Le compte MoneyScout a changé. Recharge la page avant de continuer.');
     if(message.kind==='ACCOUNT_LOGOUT'){
       task=null;research={owner:null,queue:[],active:{},paused:true,blocked_hosts:[]};
       await resetDeliveryAccount();activeAccount='';
@@ -142,7 +142,7 @@ async function handle(message,sender){
   }
   if(String(message.kind||'').startsWith('DELIVERY_'))return deliveryHandle(message,sender);
   if(['HELLO','START','FOCUS','RESUME','ENRICH','CONNECT_SITE','PAUSE_ENRICH','ACCOUNT_LOGOUT'].includes(message.kind)){
-    if(!isApp(sender))throw new Error('Ouvre JobBot dans sa fenêtre locale.');
+    if(!isApp(sender))throw new Error('Ouvre MoneyScout dans sa fenêtre locale.');
     if(message.kind==='HELLO'){
       research.paused=message.pause_enrichment===true;
       research.owner=sender.tab.id;await storeResearch();

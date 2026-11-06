@@ -10,8 +10,8 @@
   const report=(status,message,verified=false)=>chrome.runtime.sendMessage({kind:'DELIVERY_REPORT',id:task.id,nonce:task.nonce,status,message,verified});
   const label=e=>norm([e.name,e.id,e.autocomplete,e.placeholder,e.getAttribute('aria-label'),...[...(e.labels||[])].map(text)].filter(Boolean).join(' '));
   function issue(){
-    if(all('input[type=password]').length)return 'Connecte-toi à ton compte sur ce site, puis reprends la candidature dans JobBot.';
-    if(/captcha|checkpoint|authwall|\/login|\/connexion/.test(location.pathname)||all('iframe[src*="captcha"], [class*="captcha"], [id*="captcha"]').length)return 'Le site demande une connexion ou une vérification. Termine cette étape puis reprends depuis JobBot.';
+    if(all('input[type=password]').length)return 'Connecte-toi à ton compte sur ce site, puis reprends la candidature dans MoneyScout.';
+    if(/captcha|checkpoint|authwall|\/login|\/connexion/.test(location.pathname)||all('iframe[src*="captcha"], [class*="captcha"], [id*="captcha"]').length)return 'Le site demande une connexion ou une vérification. Termine cette étape puis reprends depuis MoneyScout.';
     return '';
   }
   function identity(){
@@ -49,7 +49,7 @@
       const a=task.attachments[i],letter=i>0;
       const input=inputs.find(e=>letter?/lettre|motivation|cover/.test(label(e)):/\bcv\b|resume|curriculum/.test(label(e)))||inputs.find(e=>e.multiple)||(letter?null:inputs.length===1?inputs[0]:null);
       if(!input)throw new Error('Ce site ne propose pas de pièce jointe séparée pour la lettre. Le CV est préparé ; joins la lettre PDF ou copie son texte sur le site.');
-      if(input.files.length&&![...input.files].every(f=>task.files.includes(f.name)))throw new Error('Une autre pièce jointe est déjà sélectionnée. JobBot conserve ce fichier : vérifie-le sur le site.');
+      if(input.files.length&&![...input.files].every(f=>task.files.includes(f.name)))throw new Error('Une autre pièce jointe est déjà sélectionnée. MoneyScout conserve ce fichier : vérifie-le sur le site.');
       const items=assigned.get(input)||[];items.push(a);assigned.set(input,items);fileInputs.push(input);
     }
     for(const [input,items] of assigned){
@@ -74,9 +74,9 @@
         const heading=all('h1,h2').find(e=>norm(text(e)).includes(norm(task.recipient)));
         if(!heading)throw new Error('Le poste de cette page ne peut pas être vérifié. Ouvre la bonne annonce et reprends la préparation.');
         const buttons=all('button,a[role=button],a',document.querySelector('main')||document.body).filter(e=>/^(postuler|je postule|candidater|candidature simplifiee|postuler maintenant|apply now|easy apply)$/.test(norm(text(e))));
-        if(buttons.length!==1)throw new Error('Le formulaire n’est pas reconnu. Ouvre le bouton de candidature dans cet onglet, puis clique sur Reprendre dans JobBot.');
+        if(buttons.length!==1)throw new Error('Le formulaire n’est pas reconnu. Ouvre le bouton de candidature dans cet onglet, puis clique sur Reprendre dans MoneyScout.');
         const b=buttons[0];
-        if(b.tagName==='A'&&b.href&&new URL(b.href).origin!==location.origin)throw new Error('Le site impose un formulaire externe. Termine-le dans son onglet ; ton CV et ta lettre restent téléchargeables dans JobBot.');
+        if(b.tagName==='A'&&b.href&&new URL(b.href).origin!==location.origin)throw new Error('Le site impose un formulaire externe. Termine-le dans son onglet ; ton CV et ta lettre restent téléchargeables dans MoneyScout.');
         b.click();
         for(let i=0;i<30&&!form;i++){await wait(200);form=selectForm();}
       }

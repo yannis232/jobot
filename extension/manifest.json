@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "JobBot Cloud · Mon navigateur",
-  "description": "Relie uniquement ton site JobBot privé aux pages d’emploi et aux messageries que tu utilises.",
+  "name": "MoneyScout Cloud · Mon navigateur",
+  "description": "Relie uniquement ton site MoneyScout privé aux pages d’emploi et aux messageries que tu utilises.",
   "version": "8.0.0",
   "permissions": [
     "storage",

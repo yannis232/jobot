@@ -1,4 +1,4 @@
-"""JobBot hébergé : comptes indépendants et espaces privés."""
+"""MoneyScout hébergé : comptes indépendants et espaces privés."""
 from __future__ import annotations
 import base64
 import hmac
@@ -81,8 +81,8 @@ class Cloud(Accounts):
                     for script in manifest['content_scripts']:
                         script['matches'] = [self.origin + '/*' if v == 'https://example.invalid/*' else v for v in script['matches']]
                     data = json.dumps(manifest, ensure_ascii=False, indent=2).encode()
-                z.writestr('JobBot_Cloud_Extension/' + rel, data)
-            z.writestr('LIRE_MOI.txt', 'Extrais le dossier. Ouvre opera://extensions ou chrome://extensions, active le mode développeur, puis Charger l’extension non empaquetée et choisis JobBot_Cloud_Extension. Reviens sur ton site JobBot et recharge-le. Cette extension ne fonctionne qu’avec cette adresse HTTPS.\n')
+                z.writestr('MoneyScout_Cloud_Extension/' + rel, data)
+            z.writestr('LIRE_MOI.txt', 'Extrais le dossier. Ouvre opera://extensions ou chrome://extensions, active le mode développeur, puis Charger l’extension non empaquetée et choisis MoneyScout_Cloud_Extension. Reviens sur ton site MoneyScout et recharge-le. Cette extension ne fonctionne qu’avec cette adresse HTTPS.\n')
         return output.getvalue()
 
     def legacy(self, env, start, body, engine=app):
@@ -119,7 +119,7 @@ class Cloud(Accounts):
         if method not in ('GET', 'POST'):
             return self.response(start, '405 Method Not Allowed', {'error': 'Méthode indisponible.'})
         if method == 'POST' and env.get('HTTP_ORIGIN') != self.origin:
-            return self.response(start, '403 Forbidden', {'error': 'Ouvre le formulaire dans ton JobBot.'})
+            return self.response(start, '403 Forbidden', {'error': 'Ouvre le formulaire dans ton MoneyScout.'})
         try:
             length = int(env.get('CONTENT_LENGTH') or 0)
         except ValueError:
@@ -137,16 +137,16 @@ class Cloud(Accounts):
         if not session:
             if path == '/' and method == 'GET':
                 return self.response(start, '303 See Other', b'', extra=[('Location', '/login')])
-            return self.response(start, '401 Unauthorized', {'error': 'Ta session a expiré. Reconnecte-toi à ton JobBot.'})
+            return self.response(start, '401 Unauthorized', {'error': 'Ta session a expiré. Reconnecte-toi à ton MoneyScout.'})
         engine, tenant_lock = self.tenants.get(session['user_id'])
         if method == 'POST' and not hmac.compare_digest(str(env.get('HTTP_X_JOBBOT_TOKEN', '')), engine.TOKEN):
-            return self.response(start, '403 Forbidden', {'error': 'Recharge ton JobBot avant de continuer.'})
+            return self.response(start, '403 Forbidden', {'error': 'Recharge ton MoneyScout avant de continuer.'})
         if path == '/logout' and method == 'POST':
             with self.database() as conn:
                 conn.execute('DELETE FROM sessions WHERE id=?', (session['id'],))
             return self.response(start, '200 OK', {'ok': True}, extra=[('Set-Cookie', self.set_cookie('', 0))])
         if path == '/api/extension.zip' and method == 'GET':
-            return self.response(start, '200 OK', self.extension_zip(), 'application/zip', [('Content-Disposition', 'attachment; filename="JobBot_Cloud_Extension.zip"')])
+            return self.response(start, '200 OK', self.extension_zip(), 'application/zip', [('Content-Disposition', 'attachment; filename="MoneyScout_Cloud_Extension.zip"')])
         if path == '/api/account' and method == 'GET':
             details = {'username': session['username'], 'is_owner': session['user_id'] == 'owner', 'used_bytes': self.tenants.usage(session['user_id']), 'quota_mb': max(50, self.quota_mb) if session['user_id'] == 'owner' else self.quota_mb}
             if details['is_owner']:
@@ -225,7 +225,7 @@ def main():
     application = Cloud()
     serve(application, host='0.0.0.0', port=int(os.environ.get('PORT', '8080')), threads=6,
           max_request_body_size=MAX_BODY, max_request_header_size=32768, channel_timeout=30,
-          expose_tracebacks=False, ident='JobBot')
+          expose_tracebacks=False, ident='MoneyScout')
 
 
 if __name__ == '__main__':

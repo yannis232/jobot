@@ -10,7 +10,7 @@ from pathlib import Path
 
 def ask_password():
     while True:
-        password = getpass.getpass('Choisis un mot de passe propre à JobBot (6 caractères minimum, invisible) : ')
+        password = getpass.getpass('Choisis un mot de passe propre à MoneyScout (6 caractères minimum, invisible) : ')
         if len(password) < 6:
             print(f'{len(password)} caractères saisis : il en faut au moins 6. Recommence avec une phrase de plusieurs mots.')
             continue
@@ -55,9 +55,9 @@ def configure(domain, password=None, home=None, reset_password=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Préparer JobBot sur le compte gratuit PythonAnywhere.')
+    parser = argparse.ArgumentParser(description='Préparer MoneyScout sur le compte gratuit PythonAnywhere.')
     parser.add_argument('--domain', required=True, help='Domaine exact affiché dans Web, sans https://')
-    parser.add_argument('--reset-password', action='store_true', help='Choisir un nouveau mot de passe JobBot et révoquer les anciennes sessions, en conservant les données.')
+    parser.add_argument('--reset-password', action='store_true', help='Choisir un nouveau mot de passe MoneyScout et révoquer les anciennes sessions, en conservant les données.')
     args = parser.parse_args()
     private, data = configure(args.domain, reset_password=args.reset_password)
     root = Path(__file__).resolve().parent
@@ -68,7 +68,7 @@ def main():
     print('sys.path.insert(0, ' + repr(str(root)) + ')')
     print('from pythonanywhere_wsgi import application')
     print('Active Force HTTPS dans Web, recharge l’application puis ouvre https://' + args.domain)
-    print('Identifiant JobBot : jobbot. Mot de passe : celui que tu viens de choisir.')
+    print('Identifiant MoneyScout : jobbot. Mot de passe : celui que tu viens de choisir.')
     print('Pense à prolonger la web app gratuite depuis Web chaque mois.')
 
 

@@ -31,7 +31,7 @@
     const missing=task.attachments.filter(a=>!attachmentText().includes(a.name));
     if(!missing.length)return;
     const inputs=[...document.querySelectorAll('input[type="file"]')].filter(e=>!e.accept||/pdf|\*|document/i.test(e.accept));
-    if(!inputs.length)throw new Error('Le champ des pièces jointes n’est pas disponible. Ouvre cet onglet et les options de pièces jointes, puis clique sur Reprendre dans JobBot.');
+    if(!inputs.length)throw new Error('Le champ des pièces jointes n’est pas disponible. Ouvre cet onglet et les options de pièces jointes, puis clique sur Reprendre dans MoneyScout.');
     const input=inputs.find(e=>e.multiple)||inputs[0];
     const transfer=new DataTransfer();
     for(const a of missing){const raw=atob(a.content),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);transfer.items.add(new File([bytes],a.name,{type:a.type}));}
@@ -41,11 +41,11 @@
   }
   async function prepareEmail(){
     const subject=await until(subjectField,25000);editor=await until(emailEditor,10000);
-    if(!subject||!editor)throw new Error('Connecte-toi à ta messagerie dans cet onglet, puis clique sur Reprendre dans JobBot.');
+    if(!subject||!editor)throw new Error('Connecte-toi à ta messagerie dans cet onglet, puis clique sur Reprendre dans MoneyScout.');
     if(all('input[name="subject"],input[name="subjectbox"],input[data-test-id="compose-subject"]').length!==1)throw new Error('Plusieurs messages sont ouverts dans cet onglet. Conserve seulement le brouillon de cette candidature avant de reprendre.');
     scope=subject.closest('[data-test-id="compose"],form,[role="dialog"],.M9')||document;
     const recipients=[...new Set(recipientEmails())];
-    if(recipients.some(r=>r!==task.recipient.toLowerCase()))throw new Error('Un autre destinataire est présent. JobBot ne modifie pas ce brouillon.');
+    if(recipients.some(r=>r!==task.recipient.toLowerCase()))throw new Error('Un autre destinataire est présent. MoneyScout ne modifie pas ce brouillon.');
     if(!recipients.includes(task.recipient.toLowerCase())){
       const to=first(['input[data-test-id="compose-to"]','input[name="to"]','input[aria-label="To"]','input[aria-label="À"]'],scope);
       if(!to)throw new Error('Le destinataire ne peut pas être vérifié dans cette page.');
@@ -72,13 +72,13 @@
     if(!scope){
       const card=heading.closest('section')||heading.parentElement.parentElement;
       const buttons=all('button,a[role="button"]',card).filter(b=>/^(message|envoyer un message)$/.test(norm(b.textContent)));
-      if(buttons.length!==1)throw new Error('Le bouton Message gratuit n’est pas disponible pour ce profil. LinkedIn peut exiger une connexion acceptée ou un accès particulier. JobBot n’achète pas d’InMail.');
+      if(buttons.length!==1)throw new Error('Le bouton Message gratuit n’est pas disponible pour ce profil. LinkedIn peut exiger une connexion acceptée ou un accès particulier. MoneyScout n’achète pas d’InMail.');
       buttons[0].click();scope=await until(linkedScope,10000);
     }
     if(!scope)throw new Error('Le destinataire de la conversation ne peut pas être vérifié. Ouvre la conversation depuis le profil.');
     editor=first(['.msg-form__contenteditable[contenteditable="true"]','[contenteditable="true"][role="textbox"]'],scope);
     if(!editor)throw new Error('Aucun champ de message utilisable n’est disponible pour cette personne.');
-    if(text(editor).trim()&&norm(text(editor))!==norm(task.body))throw new Error('Un autre brouillon est déjà saisi dans LinkedIn. JobBot le conserve.');
+    if(text(editor).trim()&&norm(text(editor))!==norm(task.body))throw new Error('Un autre brouillon est déjà saisi dans LinkedIn. MoneyScout le conserve.');
     fill(editor,task.body);
     if(!verifyLinkedIn())throw new Error('Le message ou le profil LinkedIn a changé.');
   }
@@ -89,7 +89,7 @@
   }
   async function prepare(){
     if(preparing||clicked)return;preparing=true;
-    try{await (task.kind==='linkedin'?prepareLinkedIn():prepareEmail());await report('ready','Destinataire, texte'+(task.kind==='email'?', compte expéditeur et PDF':' du message LinkedIn')+' vérifiés. Relis l’aperçu dans JobBot puis confirme l’envoi.',true);}
+    try{await (task.kind==='linkedin'?prepareLinkedIn():prepareEmail());await report('ready','Destinataire, texte'+(task.kind==='email'?', compte expéditeur et PDF':' du message LinkedIn')+' vérifiés. Relis l’aperçu dans MoneyScout puis confirme l’envoi.',true);}
     catch(error){await report('needs_user',error.message).catch(()=>{});}finally{preparing=false;}
   }
   async function commit(){
