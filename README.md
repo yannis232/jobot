@@ -1,4 +1,16 @@
-# MoneyScout Cloud
+# MoneyScout
+
+**Nouvelle version autonome : [ouvrir MoneyScout](https://yannis232.github.io/jobot/).** Le dossier `pages/` se publie sur GitHub Pages, sans serveur Python, module de navigateur, clé d’IA ou autre hébergement. Thème vert foncé, espaces locaux chiffrés, CV PDF conservés dans le navigateur, comparaison des offres, lettre et CV adapté modifiables, dossiers ZIP / emails .eml avec pièces jointes, carte et suivi des relances.
+
+Les CV s’importent **une seule fois par navigateur et appareil**. Une sauvegarde chiffrée exportable conserve aussi les PDF et les candidatures ; son mot de passe est nécessaire à la restauration. Il n’y a pas de synchronisation automatique entre appareils. Le guide est dans [pages/GITHUB_PAGES.md](pages/GITHUB_PAGES.md).
+
+La recherche directe lit seize catalogues publics d’employeurs accessibles au navigateur. Quinze sites et agences disposent de liens de recherche ; leurs annonces peuvent être ajoutées en collant leur description. Le moteur officiel de La bonne alternance peut aussi être affiché sur la page, à la demande. Les filtres de contrat et le chargement des pages suivantes complètent la recherche. L’envoi final se confirme dans la messagerie, LinkedIn ou le formulaire de candidature : la version GitHub n’annonce jamais un envoi qu’elle n’a pas réalisé. La rédaction incluse repose sur des règles locales et les faits du CV, sans modèle d’IA externe.
+
+Publication : `.github/workflows/pages.yml` teste puis déploie exclusivement le dossier `pages/`. Aucun CV, compte, mot de passe ou dossier personnel n’est publié. Les bibliothèques PDF et la carte sont incluses avec leurs licences.
+
+## Ancienne version Cloud conservée
+
+Le site [PythonAnywhere](https://sin2711.pythonanywhere.com) et ses données privées restent en place. Son code avant cette adaptation est figé dans [backup/moneyscout-cloud-2026-11-06](https://github.com/yannis232/jobot/tree/backup/moneyscout-cloud-2026-11-06). Les comptes de cette version ne sont pas transférés automatiquement au stockage du navigateur. Les sections ci-dessous documentent cette ancienne édition.
 
 Des comptes personnels pour comparer des offres à ses CV, adapter un CV et une lettre, retrouver les offres sur une carte et suivre ses candidatures et relances. Un même lien peut être partagé avec des amis : chacun crée son compte et utilise son propre espace.
 
@@ -61,7 +73,7 @@ La bibliothèque Leaflet conserve sa licence dans [web/LEAFLET-LICENSE.txt](web/
 
 ## GitHub Pages
 
-Le dépôt est hébergé sur GitHub. GitHub Pages sert des fichiers statiques et ne peut pas exécuter ce serveur Python ni conserver ses comptes et CV privés. Héberger l’interface sur Pages demanderait toujours un serveur distinct pour ces fonctions.
+GitHub Pages sert la nouvelle application autonome du dossier `pages/`. Elle remplace les fonctions du serveur par un traitement et un stockage locaux dans le navigateur. Elle n’exécute pas le serveur Python décrit dans les sections Cloud et ne peut pas piloter les comptes de sites tiers.
 
 ## Connexions aux plateformes
 
