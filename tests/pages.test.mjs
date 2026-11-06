@@ -4,7 +4,7 @@ import {execFileSync} from 'node:child_process';
 import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {SOURCES,contractKind,searchPhrase,newData,rankCV,compare,adaptCV,draftLetter,makeZIP,makeEML,validEmail,safeURL,composeURL,boardLinks,toBase64,crc32,due,nextDate} from '../pages/assets/core.mjs';
-import {createRecord,unlock,seal,validateEnvelope,createSaveQueue} from '../pages/assets/vault.mjs';
+import {createRecord,unlock,seal,validateEnvelope,createSaveQueue,prepareBackup} from '../pages/assets/vault.mjs';
 import {readOffer,searchPublic,alternanceWidgetURL} from '../pages/assets/sources.mjs';
 
 const cv={id:'cv-one',name:'CV.pdf',label:'Informatique',text:'Alex Exemple\nTechnicien support informatique. Assistance utilisateurs Windows. Active Directory (notions). Installation de postes et diagnostic informatique. Travail en équipe. Baccalauréat obtenu.'};
@@ -160,4 +160,11 @@ test('une source inconnue ne déclenche aucun accès réseau',async()=>{
   globalThis.fetch=()=>{called=true;throw new Error('pas de réseau');};
   try{const fake={source:'__proto__',postingId:'12345678'};assert.equal(await readOffer(fake),fake);assert.equal(called,false);}
   finally{globalThis.fetch=previous;}
+});
+
+test('une sauvegarde reste exportable si le navigateur refuse un nouvel enregistrement',async()=>{
+ const space=await createRecord('secours','six123');space.data.profile.name='Dernières modifications';
+ const backup=await prepareBackup(space.record,space.data,space.key,async()=>{throw new Error('quota dépassé');});
+ assert.equal(backup.stored,false);
+ assert.equal((await unlock(backup.envelope,'six123')).data.profile.name,'Dernières modifications');
 });
