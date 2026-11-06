@@ -28,7 +28,7 @@ Dans ta console Bash, depuis le dossier `jobot`, lance :
 python3.12 configure_pythonanywhere.py --domain toncompte.pythonanywhere.com
 ```
 
-Remplace le domaine d’exemple par celui de ton onglet Web. Le programme te demande de choisir et confirmer un mot de passe propre à JobBot, de 16 caractères minimum. Il reste invisible à l’écran. Ne le mets ni dans le chat, ni dans GitHub, ni dans la commande.
+Remplace le domaine d’exemple par celui de ton onglet Web. Le programme te demande de choisir et confirmer un mot de passe propre à JobBot, de 6 caractères minimum. Il reste invisible à l’écran. Ne le mets ni dans le chat, ni dans GitHub, ni dans la commande.
 
 La configuration privée est écrite dans `~/.config/jobbot/settings.json` et les données dans `~/jobbot-donnees`. Ces dossiers restent hors du dépôt et ne sont pas exposés comme fichiers statiques. Une nouvelle exécution conserve le mot de passe et les données existants.
 
@@ -44,7 +44,9 @@ N’ajoute pas de correspondance de fichiers statiques pour `/`, `/cv`, le dossi
 
 Ouvre l’adresse HTTPS de ton onglet Web. L’identifiant JobBot est `jobbot` ; utilise le mot de passe choisi dans ta console privée. Ajoute tes CV et ton profil depuis ce site connecté.
 
-Pour les recherches et les candidatures : **Connecter mon navigateur → Télécharger le module**, puis installe une fois le dossier dans Opera ou Chrome en mode développeur. Recharge le site, puis connecte-toi à tes plateformes dans leurs onglets. Le module est limité à l’adresse exacte de ton JobBot.
+Le démarrage demande seulement le métier et la ville. Le CV est facultatif pour commencer. **Trouver des offres** lance la lecture publique depuis l’hébergement, sans module et sans compte sur les plateformes. L’accès gratuit de PythonAnywhere est limité : certains sites refusent cette lecture et sont signalés. La première page est lue, jusqu’à 30 annonces par source, avec un cache de 10 minutes. Aucun résultat exhaustif n’est promis.
+
+Pour envoyer sans module, prépare les PDF et le brouillon puis termine dans la messagerie ou sur l’annonce. Pour le pilotage facultatif du navigateur : **Options avancées → Navigateur connecté**, ouvre le détail du module et télécharge-le. Installe le dossier dans Opera ou Chrome en mode développeur, recharge JobBot puis connecte-toi seulement aux sites qui le demandent pour tes actions. Le module est limité à l’adresse exacte du site.
 
 La carte utilise OpenStreetMap dans le navigateur et `geo.api.gouv.fr` pour identifier les communes ; ce dernier figure dans la liste d’accès autorisés de l’hébergement gratuit au moment de la préparation. L’import direct de certaines pages d’employeur et la vérification de coordonnées peuvent être limités par l’offre gratuite ou par le site lui-même. Le module peut lire les descriptions affichées ; une source inaccessible doit rester signalée comme telle.
 
@@ -54,7 +56,7 @@ La carte utilise OpenStreetMap dans le navigateur et `geo.api.gouv.fr` pour iden
 
 Partage l’adresse de ton site, ou directement son chemin `/register`. Les amis choisissent **Créer mon compte**, gardent leur code de secours, puis ajoutent leurs propres CV et connexions. Ne leur donne pas le mot de passe du compte d’origine `jobbot`. Les nouvelles inscriptions ne passent pas par la console PythonAnywhere.
 
-Chaque personne installe le module téléchargé depuis son espace dans son propre navigateur. Après cette mise à jour, remplace un ancien module Cloud pour bénéficier de l’arrêt des tâches lors du changement de compte. Le compte et les sessions du propriétaire sont migrés automatiquement.
+Aucune installation n’est demandée pour le mode simple. Chaque personne qui choisit le mode avancé installe le module facultatif téléchargé depuis son espace dans son propre navigateur. Après cette mise à jour, remplace un ancien module Cloud pour bénéficier de l’arrêt des tâches lors du changement de compte. Le compte et les sessions du propriétaire sont migrés automatiquement.
 
 La configuration gratuite accepte par défaut 12 comptes au total, dont celui d’origine, et prévoit 20 Mo par nouveau compte. Ce format convient à un petit groupe. Les CV, profils, contacts, candidatures et lettres sont séparés entre comptes ; les nouveaux mots de passe et codes de secours ne sont pas conservés en clair. Le propriétaire de l’hébergement garde l’administration du stockage. Les emails automatiques de vérification ou de récupération ne sont pas activés : la récupération utilise le code de secours.
 
@@ -67,7 +69,7 @@ cd ~/jobot
 python3.12 configure_pythonanywhere.py --domain toncompte.pythonanywhere.com --reset-password
 ```
 
-Saisis et confirme le nouveau mot de passe, puis clique sur **Reload** dans Web et recharge la page de connexion. Les anciennes sessions sont invalidées et les CV ainsi que le suivi sont conservés. Une phrase de plusieurs mots convient si elle contient au moins 16 caractères. Ne communique pas ce mot de passe dans le chat.
+Saisis et confirme le nouveau mot de passe, puis clique sur **Reload** dans Web et recharge la page de connexion. Les anciennes sessions sont invalidées et les CV ainsi que le suivi sont conservés. Une phrase de plusieurs mots convient si elle contient au moins 6 caractères. Ne communique pas ce mot de passe dans le chat.
 
 - Prolonge l’application gratuite depuis **Web** chaque mois, avant son expiration.
 - Conserve une copie de tes CV et exporte régulièrement ton suivi.

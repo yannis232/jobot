@@ -142,8 +142,8 @@ class Accounts:
 
     def password_error(self, values):
         password = values.get('password', '')
-        if not 16 <= len(password) <= 200:
-            return 'Choisis un mot de passe de 16 à 200 caractères. Une phrase de plusieurs mots convient.'
+        if not 6 <= len(password) <= 200:
+            return 'Choisis un mot de passe de 6 à 200 caractères.'
         if not hmac.compare_digest(password.encode(), values.get('confirmation', '').encode()):
             return 'Les deux mots de passe diffèrent. Retape le même mot de passe dans les deux champs.'
         return ''

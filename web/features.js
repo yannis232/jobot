@@ -84,7 +84,7 @@
     if(t.status==='sent')toast('Le site a confirmé l’envoi. Ton suivi est à jour.');
   });
   document.addEventListener('click',event=>{
-    const connect=event.target.closest('[data-connect-webmail]');if(connect)run(connect,async()=>{if(!bridgeReady)throw new Error('Ouvre JobBot avec son lanceur Opera.');await bridgeCall('CONNECT_SITE',{site:connect.dataset.connectWebmail});toast('Termine la connexion dans cet onglet puis reviens à JobBot.');});
+    const connect=event.target.closest('[data-connect-webmail]');if(connect)run(connect,async()=>{if(!bridgeReady&&window.JobBotCloud){window.open(connect.dataset.connectWebmail==='gmail'?'https://mail.google.com/':'https://mail.yahoo.com/','_blank','noopener');toast('Ajoute ton CV et ta lettre PDF dans ta messagerie, puis termine l’envoi.');return;}if(!bridgeReady)throw new Error('Ouvre JobBot avec son lanceur Opera.');await bridgeCall('CONNECT_SITE',{site:connect.dataset.connectWebmail});toast('Termine la connexion dans cet onglet puis reviens à JobBot.');});
     const choose=event.target.closest('[data-choose-cv]');if(choose)run(choose,async()=>{const f=$('#job-form');f.elements.profile.value=choose.dataset.chooseCv;f.elements.profile.dispatchEvent(new Event('change'));const job=await saveForm();renderJob(job);toast('CV sélectionné. Actualise la lettre si son contenu doit changer.');});
     const letter=event.target.closest('[data-letter-offer]');if(letter)run(letter,async()=>{const job=await api('/api/offer/prepare',{offer_id:letter.dataset.letterOffer});await refresh();openJob(job);$('.letter-editor').scrollIntoView({block:'start'});});
   });

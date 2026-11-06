@@ -78,7 +78,7 @@ function renderHome(){
   if(uncertain) tasks.push(['Vérifier un envoi email',uncertain.company+' : consulte le dossier Envoyés avant toute nouvelle action.',`data-edit="${esc(uncertain.id)}"`,'Ouvrir la fiche']);
   const followup=jobs.find(due);
   if(followup) tasks.push(['Reprendre contact avec '+followup.company,'La date de relance est arrivée. Prépare et relis ton message.',`data-edit="${esc(followup.id)}"`,'Préparer la suite']);
-  if(!mailConnected()) tasks.push(['Connecter '+mailLabel(),'Pour envoyer directement les candidatures qui proposent une adresse de recrutement.','data-go="connexions"','Configurer la messagerie']);
+  if(!mailConnected()&&!window.JobBotCloud) tasks.push(['Connecter '+mailLabel(),'Pour envoyer directement les candidatures qui proposent une adresse de recrutement.','data-go="connexions"','Configurer la messagerie']);
   const draft=jobs.find(j=>['nouvelle','preparee'].includes(j.status));
   if(draft) tasks.push(['Préparer ta candidature',draft.title+' · '+draft.company,`data-edit="${esc(draft.id)}"`,'Ouvrir le brouillon']);
   tasks.push(['Chercher sur les huit sites','Indeed France, France Travail, HelloWork et LinkedIn dans une seule liste.','data-go="offres"','Voir les offres']);
@@ -569,6 +569,7 @@ async function startup(force=false){
     sources().catch(()=>{});
     connectBridge().catch(()=>{
       if(bridgeReady)return;
+      if(window.JobBotCloud){$('#browser-status').textContent='Mode simple · aucune installation ni connexion aux plateformes pour lancer la recherche.';$('#open-jobbot-browser').hidden=true;return;}
       $('#browser-status').textContent='La recherche intégrée utilise la fenêtre Opera JobBot. Ouvre-la avec le bouton ci-dessous.';
       $('#open-jobbot-browser').hidden=false;
     });

@@ -10,9 +10,9 @@ from pathlib import Path
 
 def ask_password():
     while True:
-        password = getpass.getpass('Choisis un mot de passe propre à JobBot (16 caractères minimum, invisible) : ')
-        if len(password) < 16:
-            print(f'{len(password)} caractères saisis : il en faut au moins 16. Recommence avec une phrase de plusieurs mots.')
+        password = getpass.getpass('Choisis un mot de passe propre à JobBot (6 caractères minimum, invisible) : ')
+        if len(password) < 6:
+            print(f'{len(password)} caractères saisis : il en faut au moins 6. Recommence avec une phrase de plusieurs mots.')
             continue
         again = getpass.getpass('Confirme ce mot de passe : ')
         if password == again:
@@ -36,8 +36,8 @@ def configure(domain, password=None, home=None, reset_password=False):
     if reset_password or 'JOBBOT_OWNER_PASSWORD' not in settings:
         if password is None:
             password = ask_password()
-        if len(password) < 16:
-            raise ValueError('Utilise au moins 16 caractères. Aucun fichier créé.')
+        if len(password) < 6:
+            raise ValueError('Utilise au moins 6 caractères. Aucun fichier créé.')
         settings['JOBBOT_OWNER_PASSWORD'] = password
         # Une réinitialisation invalide aussi les anciennes sessions et tentatives.
         settings['JOBBOT_SESSION_SECRET'] = secrets.token_urlsafe(48)

@@ -87,6 +87,7 @@
     try{const r=await api('/api/enrich/tasks');if(r.tasks.length)await bridgeCall('ENRICH',{tasks:r.tasks});}catch{}finally{pumping=false;}
   }
   async function prioritize(offerId){
+    if(window.JobBotCloud&&!bridgeReady)return;
     const r=await api('/api/enrich/start',{offer_id:offerId});
     adoptFeed(r.feed);
     if(bridgeReady&&r.tasks.length)await bridgeCall('ENRICH',{tasks:r.tasks,manual:true});
@@ -118,7 +119,7 @@
     const research=event.target.closest('[data-priority-research]');if(research)run(research,()=>prioritize(research.dataset.priorityResearch));
   });
   $('#setup-profile-form').addEventListener('input',()=>{profileDirty=true;});
-  $('#setup-profile-form').addEventListener('submit',event=>{event.preventDefault();run(event.submitter,async()=>{await api('/api/profile',Object.fromEntries(new FormData(event.target)));profileDirty=false;await refresh();showStep(1);});});
+  $('#setup-profile-form').addEventListener('submit',event=>{event.preventDefault();run(event.submitter,async()=>{await api('/api/profile',Object.fromEntries(new FormData(event.target)));profileDirty=false;await refresh();if(window.JobBotCloud){acceptState(await api('/api/setup/finish',{}));renderAll();go('offres');$('#feed-city').value=state.profile.city;$('#search-query').value=state.profile.query;await refreshFeed();return;}showStep(1);});});
   for(const [id,target] of [['setup-upload-form','#setup-cv-result'],['cv-upload-form','#cv-upload-result']])$('#'+id).addEventListener('submit',event=>{event.preventDefault();run(event.submitter,()=>upload(event.target,target));});
   $('#setup-mail-form').addEventListener('change',event=>{
     if(event.target.name==='email_provider'){

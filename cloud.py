@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from urllib.parse import quote, urlsplit
 
 import app
+import public_search
 from accounts import Accounts
 from tenants import TenantStore
 
@@ -42,8 +43,8 @@ class Cloud(Accounts):
         self.username = str(env.get('JOBBOT_OWNER_USERNAME') or 'jobbot')
         password = str(env.get('JOBBOT_OWNER_PASSWORD') or '')
         self.secret = str(env.get('JOBBOT_SESSION_SECRET') or '').encode()
-        if len(password) < 16 or len(self.secret) < 32:
-            raise ValueError('Configure un mot de passe privé de 16 caractères minimum et une clé de session de 32 caractères minimum dans les secrets de l’hébergeur.')
+        if len(password) < 6 or len(self.secret) < 32:
+            raise ValueError('Configure un mot de passe privé de 6 caractères minimum et une clé de session de 32 caractères minimum dans les secrets de l’hébergeur.')
         self.password_hash = self.password_digest(password)
         self.cookie = 'jobbot_test_session' if self.local_test else COOKIE
         self.lock = threading.RLock()
@@ -178,6 +179,44 @@ class Cloud(Accounts):
                     reserve += max((p.stat().st_size for p in (engine.DATA / 'cv').glob('*.pdf')), default=0) * 2 + 262144
                 if self.tenants.usage(session['user_id']) + reserve > quota:
                     return self.response(start, '413 Payload Too Large', {'error': 'Ton espace de stockage est presque plein. Exporte ton suivi et utilise des CV PDF plus légers avant de réessayer.'})
+            if path in ('/api/public/search/start', '/api/public/search/site', '/api/setup/finish', '/api/offer/prepare') and method == 'POST':
+                try:
+                    payload = json.loads(body)
+                    if not isinstance(payload, dict):
+                        raise ValueError('Requête incorrecte.')
+                    if path == '/api/offer/prepare':
+                        if engine.boards.load(engine.DATA).get('access_mode') == 'public':
+                            public_search.enrich_offer(engine, payload.get('offer_id'))
+                        return self.legacy(env, start, body, engine)
+                    if path == '/api/setup/finish':
+                        profile = engine.load_profile()
+                        if not profile.get('city') or not profile.get('query'):
+                            raise ValueError('Indique le métier et la ville de ta recherche.')
+                        engine.save_config({'onboarding_done': True})
+                        return self.response(start, '200 OK', engine.app_state())
+                    if path == '/api/public/search/start':
+                        with self.database() as conn:
+                            attempt = self.rate_limit(conn, {'REMOTE_ADDR': session['user_id']}, 'public-search', limit=12, window=900)
+                        if attempt is None:
+                            return self.response(start, '429 Too Many Requests', {'error': 'Plusieurs recherches viennent d’être lancées. Attends quelques minutes avant de réessayer.'})
+                        engine.boards.start(engine.DATA, payload.get('query', ''), payload.get('city', ''))
+                        feed = engine.boards.load(engine.DATA, internal=True)
+                        feed['access_mode'] = 'public'
+                        engine.boards.save(engine.DATA, feed)
+                        return self.response(start, '200 OK', engine.get_feed())
+                    feed = engine.boards.load(engine.DATA)
+                    if payload.get('search_id') != feed['search_id'] or not feed['search_id'] or feed.get('access_mode') != 'public':
+                        raise ValueError('Cette recherche a été remplacée. Relance depuis ton espace.')
+                    source = payload.get('source_id')
+                    if source not in engine.boards.SITES:
+                        raise ValueError('Site inconnu.')
+                    # Aucun URL/cookie fourni par le navigateur : uniquement nos
+                    # huit adresses publiques. Le cache ne contient aucun CV.
+                    result = public_search.search_site(source, feed['query'], feed['city'], feed.get('commune_code', ''))
+                    engine.boards.receive(engine.DATA, {**result, 'search_id': feed['search_id']})
+                    return self.response(start, '200 OK', engine.get_feed())
+                except (ValueError, TypeError) as error:
+                    return self.response(start, '400 Bad Request', {'error': str(error)})
             return self.legacy(env, start, body, engine)
 
 

@@ -89,7 +89,7 @@ class CloudTests(unittest.TestCase):
         self.assertEqual(self.call('/api/state')[0], 200)
         before = private.read_bytes()
         with self.assertRaises(ValueError):
-            configure('exemple.pythonanywhere.com', password='trop court', home=home, reset_password=True)
+            configure('exemple.pythonanywhere.com', password='court', home=home, reset_password=True)
         self.assertEqual(private.read_bytes(), before)
         new_password = 'Nouvelle phrase FICTIVE pour les tests'
         configure('exemple.pythonanywhere.com', password=new_password, home=home, reset_password=True)

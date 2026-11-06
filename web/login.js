@@ -17,8 +17,8 @@
     const counter = document.getElementById('password-count');
     const length = Array.from(password.value).length;
     if (counter) {
-      counter.textContent = length + ' caractères · 16 minimum, espaces compris.';
-      password.setCustomValidity(length < 16 ? 'Utilise au moins 16 caractères, espaces compris.' : '');
+      counter.textContent = length + ' caractères · 6 minimum, espaces compris.';
+      password.setCustomValidity(length < 6 ? 'Utilise au moins 6 caractères, espaces compris.' : '');
     }
     if (confirmation) confirmation.setCustomValidity(confirmation.value !== password.value ? 'Les deux mots de passe doivent être identiques.' : '');
   }
