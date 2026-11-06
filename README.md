@@ -4,9 +4,9 @@
 
 Les CV s’importent **une seule fois par navigateur et appareil**. Une sauvegarde chiffrée exportable conserve aussi les PDF et les candidatures ; son mot de passe est nécessaire à la restauration. Il n’y a pas de synchronisation automatique entre appareils. Le guide est dans [pages/GITHUB_PAGES.md](pages/GITHUB_PAGES.md).
 
-La recherche directe lit seize catalogues publics d’employeurs accessibles au navigateur. Quinze sites et agences disposent de liens de recherche ; leurs annonces peuvent être ajoutées en collant leur description. Le moteur officiel de La bonne alternance peut aussi être affiché sur la page, à la demande. Les filtres de contrat et le chargement des pages suivantes complètent la recherche. L’envoi final se confirme dans la messagerie, LinkedIn ou le formulaire de candidature : la version GitHub n’annonce jamais un envoi qu’elle n’a pas réalisé. La rédaction incluse repose sur des règles locales et les faits du CV, sans modèle d’IA externe.
+La recherche directe lit dix-neuf catalogues publics d’employeurs accessibles au navigateur. Les résultats s’affichent directement, avec recherche automatique des intitulés voisins et de communes proches. Quinze sites et agences gardent leurs liens dans les ressources facultatives du profil ; leurs annonces peuvent être ajoutées en collant leur description. Le moteur officiel de La bonne alternance apparaît après une recherche d’alternance. Les filtres de contrat et les pages supplémentaires sont traités par la même recherche. L’envoi final se confirme dans la messagerie, LinkedIn ou le formulaire de candidature : la version GitHub n’annonce jamais un envoi qu’elle n’a pas réalisé. La rédaction incluse repose sur des règles locales et les faits du CV, sans modèle d’IA externe.
 
-Publication : `.github/workflows/pages.yml` teste puis déploie exclusivement le dossier `pages/`. Aucun CV, compte, mot de passe ou dossier personnel n’est publié. Les bibliothèques PDF et la carte sont incluses avec leurs licences.
+Publication : `.github/workflows/pages.yml` teste puis construit et déploie exclusivement les fichiers publics issus de `pages/`. Aucun CV, compte, mot de passe ou dossier personnel n’est publié. Les bibliothèques PDF et la carte sont incluses avec leurs licences.
 
 ## Ancienne version Cloud conservée
 

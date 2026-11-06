@@ -53,7 +53,7 @@ test('les mots propres aux métiers manuels sont repris avec une preuve, sans co
 test('les pages suivantes ajoutent des annonces distinctes et respectent le plafond de 500',async()=>{
   const original=globalThis.fetch;
   globalThis.fetch=async url=>{const u=new URL(url),id=u.pathname.split('/').at(-1);if(/\/postings\//.test(u.pathname))return Response.json({id,name:'Assistant comptable',location:{country:'fr'},jobAd:{sections:{jobDescription:{text:'Tenue de comptabilité et facturation. '.repeat(5)}}}});const offset=Number(u.searchParams.get('offset')||0),limit=Number(u.searchParams.get('limit'));return Response.json({totalFound:1000,content:Array.from({length:limit},(_,i)=>({id:String(100000+offset+i),name:'Assistant comptable',location:{country:'fr'}}))});};
-  try{const first=await searchPublic('comptable','');assert.equal(first.items.length,320);assert(first.hasMore);const next=await searchPublic('comptable','',{previous:first});assert.equal(next.items.length,500);assert.equal(new Set(next.items.map(o=>o.url)).size,500);assert.equal(next.hasMore,false);await assert.rejects(searchPublic('autre','',{previous:first}),/Relance/);}finally{globalThis.fetch=original;}
+  try{const first=await searchPublic('comptable','');assert.equal(first.items.length,Object.keys(SOURCES).length*20);assert(first.hasMore);const next=await searchPublic('comptable','',{previous:first});assert.equal(next.items.length,500);assert.equal(new Set(next.items.map(o=>o.url)).size,500);assert.equal(next.hasMore,false);await assert.rejects(searchPublic('autre','',{previous:first}),/Relance/);}finally{globalThis.fetch=original;}
 });
 
 test('une mention alternance dans le corps d’un stage ne passe pas le filtre de contrat',async()=>{

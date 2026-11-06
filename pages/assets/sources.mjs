@@ -20,5 +20,13 @@ for(const s of sources)s.message=statusMessage(s,items);sources.sort((a,b)=>Obje
 return {items,sources,query,city,kind,hasMore:items.length<500&&sources.some(s=>s.ok&&s.nextOffset<s.total),checkedAt:now()};
 }
 export function alternanceWidgetURL(geo=null){const params=new URLSearchParams({scope:'all',caller:'MoneyScout - github.com/yannis232/jobot/issues',radius:'30'});if(geo&&Number.isFinite(geo.latitude)&&Number.isFinite(geo.longitude)){params.set('lat',String(geo.latitude));params.set('lon',String(geo.longitude));}return 'https://labonnealternance.apprentissage.beta.gouv.fr/recherche-emploi?'+params;}
-export async function readOffer(offer,signal){if(!Object.hasOwn(SOURCES,offer.source)||!/^\d{5,30}$/.test(offer.postingId||''))return offer;const json=await getJSON(`https://api.smartrecruiters.com/v1/companies/${offer.source}/postings/${offer.postingId}`,signal);if(json.active===false)throw new Error('Cette annonce est clôturée dans sa source.');return {...offer,...parse(json,offer.source,true)};}
+export async function readCatalogue(source,query,city,{signal,offset=0,limit=30,kind='all'}={}){
+if(!Object.hasOwn(SOURCES,source))throw new Error('Catalogue inconnu.');
+const params=new URLSearchParams({country:'fr',limit:String(Math.max(1,Math.min(100,Math.floor(limit)))),offset:String(Math.max(0,Math.min(2000,Math.floor(offset))))});
+const phrase=searchPhrase(query,kind);if(phrase)params.set('q',phrase);if(city)params.set('city',city);
+const json=await getJSON('https://api.smartrecruiters.com/v1/companies/'+source+'/postings?'+params,signal);
+if(!Array.isArray(json.content))throw new Error('Résultats non reconnus.');
+return {items:json.content.filter(r=>String(r.location?.country).toLowerCase()==='fr').map(r=>parse(r,source)).filter(o=>kind==='all'||o.contractKind===kind),scanned:json.content.length,total:Number(json.totalFound)||0,offset};
+}
+export async function readOffer(offer,signal){if(!Object.hasOwn(SOURCES,offer.source)||!/^\d{5,30}$/.test(offer.postingId||''))return offer;const json=await getJSON(`https://api.smartrecruiters.com/v1/companies/${offer.source}/postings/${offer.postingId}`,signal);if(json.active===false){const error=new Error('Cette annonce est clôturée dans sa source.');error.code='CLOSED';throw error;}return {...offer,...parse(json,offer.source,true)};}
 export async function locateCity(city,signal){if(!city)return null;const q=new URLSearchParams({nom:city.replace(/\s*\d{2}(?:e|er|eme)?\s*$/i,''),fields:'nom,centre,population',boost:'population',limit:'5'});const response=await fetch('https://geo.api.gouv.fr/communes?'+q,{credentials:'omit',signal,referrerPolicy:'no-referrer'});if(!response.ok)return null;const rows=await response.json();const target=rows.find(t=>norm(t.nom)===norm(q.get('nom')))||rows[0];if(!target?.centre?.coordinates)return null;return {latitude:target.centre.coordinates[1],longitude:target.centre.coordinates[0],name:target.nom,kind:'commune'};}

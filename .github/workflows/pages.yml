@@ -2,7 +2,7 @@ name: Publier MoneyScout sur GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ['pages/**', 'tests/pages*.mjs', '.github/workflows/pages.yml']
+    paths: ['pages/**', 'tests/pages*.mjs', 'scripts/build_pages.py', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,11 +21,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test tests/pages.test.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: node --test tests/pages*.test.mjs
+      - run: python3 scripts/build_pages.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: pages
+          path: .pages-dist
       - name: Publier
         id: deployment
         uses: actions/deploy-pages@v4
