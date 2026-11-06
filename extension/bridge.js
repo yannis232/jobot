@@ -1,14 +1,15 @@
 (() => {
   'use strict';
   const token=document.querySelector('meta[name="jobbot-token"]')?.content;
+  const accountScope=document.querySelector('meta[name="jobbot-account"]')?.content;
   if(!token||document.querySelector('meta[name="jobbot-app"]')?.content!=='8.0.0')return;
   const publish=data=>window.postMessage({channel:'jobbot-bridge',...data},location.origin);
   window.addEventListener('message',async event=>{
     if(event.source!==window||event.origin!==location.origin||event.data?.channel!=='jobbot-request')return;
     const {id,command,payload}=event.data;
-    if(!['HELLO','START','FOCUS','RESUME','ENRICH','CONNECT_SITE','PAUSE_ENRICH','DELIVERY_PREPARE','DELIVERY_SEND','DELIVERY_FOCUS'].includes(command))return;
+    if(!['HELLO','START','FOCUS','RESUME','ENRICH','CONNECT_SITE','PAUSE_ENRICH','ACCOUNT_LOGOUT','DELIVERY_PREPARE','DELIVERY_SEND','DELIVERY_FOCUS'].includes(command))return;
     try{
-      const response=await chrome.runtime.sendMessage({...payload,kind:command});
+      const response=await chrome.runtime.sendMessage({...payload,kind:command,accountScope});
       publish({kind:'response',id,result:response});
     }catch{publish({kind:'response',id,result:{error:'Le navigateur JobBot doit être rouvert depuis le programme.'}});}
   });

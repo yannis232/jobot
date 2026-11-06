@@ -385,6 +385,8 @@ function adoptFeed(feed){
 async function connectBridge(automatic=true){
   const result=await bridgeCall('HELLO',{search_id:state.feed.search_id,pause_enrichment:state.config.auto_enrich===false||!state.config.onboarding_done});
   if(result.version!==APP_BUILD)throw new Error('Rouvre JobBot depuis le dossier VERSION 8.0.0.');
+  const accountScope=document.querySelector('meta[name="jobbot-account"]')?.content;
+  if(accountScope&&result.account_scope!==accountScope)throw new Error('Mets à jour le module pour utiliser les comptes personnels : Connecter mon navigateur → Télécharger le module, puis remplace l’ancien module dans Opera.');
   bridgeReady=true;bridgeSearchId=result.search_id||'';
   $('#browser-status').textContent='Navigateur JobBot connecté · les quatre recherches peuvent démarrer ensemble.';
   $('#open-jobbot-browser').hidden=true;

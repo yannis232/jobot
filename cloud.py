@@ -1,28 +1,21 @@
-"""Instance web privée mono-utilisateur, sans dépendance au PC Windows."""
+"""JobBot hébergé : comptes indépendants et espaces privés."""
 from __future__ import annotations
 import base64
-import hashlib
 import hmac
-import html
 import io
 import json
 import os
-import secrets
-import sqlite3
 import threading
-import time
 import zipfile
-from contextlib import contextmanager
-from http.cookies import SimpleCookie
-from pathlib import Path
 from types import SimpleNamespace
-from urllib.parse import parse_qs, quote, urlsplit
+from urllib.parse import quote, urlsplit
 
 import app
+from accounts import Accounts
+from tenants import TenantStore
 
 COOKIE = '__Host-jobbot_session'
 MAX_BODY = 12_000_000
-SESSION_AGE = 12 * 3600
 
 
 class MemoryConnection:
@@ -37,7 +30,7 @@ class MemoryConnection:
         self.output.write(raw)
 
 
-class Cloud:
+class Cloud(Accounts):
     def __init__(self, environment=None):
         env = os.environ if environment is None else environment
         self.origin = str(env.get('JOBBOT_PUBLIC_ORIGIN') or env.get('RENDER_EXTERNAL_URL') or '').rstrip('/')
@@ -54,53 +47,12 @@ class Cloud:
         self.password_hash = self.password_digest(password)
         self.cookie = 'jobbot_test_session' if self.local_test else COOKIE
         self.lock = threading.RLock()
+        self.root, self.data = app.ROOT, app.DATA.resolve()
+        self.max_accounts = max(2, min(30, int(env.get('JOBBOT_MAX_ACCOUNTS', '12'))))
+        self.quota_mb = max(5, min(100, int(env.get('JOBBOT_USER_QUOTA_MB', '20'))))
         app.init()
-        with self.database() as conn:
-            conn.execute('CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, expires INTEGER NOT NULL)')
-            conn.execute('CREATE TABLE IF NOT EXISTS attempts (client TEXT, at INTEGER)')
-            conn.execute('CREATE INDEX IF NOT EXISTS attempts_client ON attempts(client,at)')
-
-    @contextmanager
-    def database(self):
-        conn = sqlite3.connect(app.DATA / 'cloud_auth.sqlite', timeout=15)
-        try:
-            with conn:
-                yield conn
-        finally:
-            conn.close()
-
-    def password_digest(self, password):
-        return hashlib.scrypt(str(password).encode(), salt=self.secret, n=16384, r=8, p=1)
-
-    def signed(self, value):
-        return hmac.new(self.secret, value.encode(), hashlib.sha256).hexdigest()
-
-    def csrf(self):
-        hour = str(int(time.time()) // 3600)
-        return hour + '.' + self.signed('login:' + hour)
-
-    def csrf_valid(self, value):
-        try:
-            hour, sig = value.split('.', 1)
-            return abs(int(time.time()) // 3600 - int(hour)) <= 1 and hmac.compare_digest(sig, self.signed('login:' + hour))
-        except (ValueError, AttributeError):
-            return False
-
-    def session(self, env):
-        try:
-            cookies = SimpleCookie(env.get('HTTP_COOKIE', ''))
-            value = cookies[self.cookie].value
-        except (KeyError, ValueError):
-            return ''
-        if len(value) > 100:
-            return ''
-        identifier = self.signed(value)
-        with self.database() as conn:
-            row = conn.execute('SELECT expires FROM sessions WHERE id=?', (identifier,)).fetchone()
-        return identifier if row and row[0] > time.time() else ''
-
-    def set_cookie(self, value, age=SESSION_AGE):
-        return f'{self.cookie}={value}; Path=/; HttpOnly; SameSite=Strict; Max-Age={age}' + ('' if self.local_test else '; Secure')
+        self.init_accounts()
+        self.tenants = TenantStore(app, self.data, self.signed)
 
     def response(self, start, status, body, kind='application/json; charset=utf-8', extra=()):
         data = body if isinstance(body, bytes) else (body if isinstance(body, str) else json.dumps(body, ensure_ascii=False)).encode('utf-8')
@@ -111,35 +63,6 @@ class Cloud:
             headers.append(('Strict-Transport-Security', 'max-age=31536000'))
         start(status, headers + list(extra))
         return [data]
-
-    def login_page(self, start, error='', status='200 OK'):
-        page = (app.ROOT / 'web' / 'login.html').read_text(encoding='utf-8')
-        page = page.replace('__LOGIN_ERROR__', html.escape(error)).replace('__LOGIN_CSRF__', self.csrf()).replace('__LOGIN_USERNAME__', html.escape(self.username, quote=True))
-        return self.response(start, status, page, 'text/html; charset=utf-8')
-
-    def login(self, env, start, body):
-        if len(body) > 4096:
-            return self.login_page(start, 'Formulaire incorrect.', '400 Bad Request')
-        values = parse_qs(body.decode('utf-8', errors='replace'))
-        if not self.csrf_valid(values.get('csrf', [''])[0]):
-            return self.login_page(start, 'Recharge la page de connexion.', '403 Forbidden')
-        client = self.signed(str(env.get('REMOTE_ADDR', 'unknown')))
-        with self.lock, self.database() as conn:
-            conn.execute('DELETE FROM attempts WHERE at<?', (time.time() - 900,))
-            count = conn.execute('SELECT COUNT(*) FROM attempts WHERE client=?', (client,)).fetchone()[0]
-            if count >= 10:
-                return self.login_page(start, 'Trop de tentatives. Réessaie dans quinze minutes.', '429 Too Many Requests')
-            conn.execute('INSERT INTO attempts(client,at) VALUES(?,?)', (client, int(time.time())))
-            username = values.get('username', [''])[0]
-            password = values.get('password', [''])[0]
-            password_ok = hmac.compare_digest(self.password_digest(password), self.password_hash)
-            if not (hmac.compare_digest(username.encode(), self.username.encode()) and password_ok):
-                return self.login_page(start, 'Identifiant ou mot de passe incorrect.', '401 Unauthorized')
-            token = secrets.token_urlsafe(32)
-            conn.execute('DELETE FROM sessions WHERE expires<?', (time.time(),))
-            conn.execute('INSERT INTO sessions VALUES(?,?)', (self.signed(token), int(time.time()) + SESSION_AGE))
-            conn.execute('DELETE FROM attempts WHERE client=?', (client,))
-        return self.response(start, '303 See Other', b'', extra=[('Location', '/'), ('Set-Cookie', self.set_cookie(token))])
 
     def extension_zip(self):
         output = io.BytesIO()
@@ -161,7 +84,7 @@ class Cloud:
             z.writestr('LIRE_MOI.txt', 'Extrais le dossier. Ouvre opera://extensions ou chrome://extensions, active le mode développeur, puis Charger l’extension non empaquetée et choisis JobBot_Cloud_Extension. Reviens sur ton site JobBot et recharge-le. Cette extension ne fonctionne qu’avec cette adresse HTTPS.\n')
         return output.getvalue()
 
-    def legacy(self, env, start, body):
+    def legacy(self, env, start, body, engine=app):
         method = env.get('REQUEST_METHOD', 'GET')
         path = quote(env.get('PATH_INFO', '/'), safe='/%:@')
         query = env.get('QUERY_STRING', '')
@@ -173,7 +96,7 @@ class Cloud:
             headers['X-JobBot-Token'] = env['HTTP_X_JOBBOT_TOKEN']
         raw = (method + ' ' + target + ' HTTP/1.0\r\n' + ''.join(k + ': ' + v + '\r\n' for k, v in headers.items()) + '\r\n').encode('latin-1') + body
         connection = MemoryConnection(raw)
-        app.Handler(connection, ('127.0.0.1', 1), SimpleNamespace(server_port=1))
+        engine.Handler(connection, ('127.0.0.1', 1), SimpleNamespace(server_port=1))
         head, content = connection.output.getvalue().split(b'\r\n\r\n', 1)
         lines = head.decode('latin-1').split('\r\n')
         status = lines[0].split(' ', 1)[1]
@@ -203,8 +126,9 @@ class Cloud:
         if length < 0 or length > MAX_BODY:
             return self.response(start, '413 Payload Too Large', {'error': 'Fichier trop volumineux.'})
         body = env['wsgi.input'].read(length) if method == 'POST' else b''
-        if path == '/login':
-            return self.login(env, start, body) if method == 'POST' else self.login_page(start)
+        if path in ('/login', '/register', '/recover'):
+            action = path[1:]
+            return getattr(self, action)(env, start, body) if method == 'POST' else self.auth_page(action, start)
         if path in ('/login.css', '/login.js') and method == 'GET':
             ext = path.rsplit('.', 1)[1]
             return self.response(start, '200 OK', (app.ROOT / 'web' / ('login.' + ext)).read_bytes(), 'text/css; charset=utf-8' if ext == 'css' else 'application/javascript; charset=utf-8')
@@ -213,14 +137,21 @@ class Cloud:
             if path == '/' and method == 'GET':
                 return self.response(start, '303 See Other', b'', extra=[('Location', '/login')])
             return self.response(start, '401 Unauthorized', {'error': 'Ta session a expiré. Reconnecte-toi à ton JobBot.'})
-        if method == 'POST' and not hmac.compare_digest(str(env.get('HTTP_X_JOBBOT_TOKEN', '')), app.TOKEN):
+        engine, tenant_lock = self.tenants.get(session['user_id'])
+        if method == 'POST' and not hmac.compare_digest(str(env.get('HTTP_X_JOBBOT_TOKEN', '')), engine.TOKEN):
             return self.response(start, '403 Forbidden', {'error': 'Recharge ton JobBot avant de continuer.'})
         if path == '/logout' and method == 'POST':
             with self.database() as conn:
-                conn.execute('DELETE FROM sessions WHERE id=?', (session,))
+                conn.execute('DELETE FROM sessions WHERE id=?', (session['id'],))
             return self.response(start, '200 OK', {'ok': True}, extra=[('Set-Cookie', self.set_cookie('', 0))])
         if path == '/api/extension.zip' and method == 'GET':
             return self.response(start, '200 OK', self.extension_zip(), 'application/zip', [('Content-Disposition', 'attachment; filename="JobBot_Cloud_Extension.zip"')])
+        if path == '/api/account' and method == 'GET':
+            details = {'username': session['username'], 'is_owner': session['user_id'] == 'owner', 'used_bytes': self.tenants.usage(session['user_id']), 'quota_mb': max(50, self.quota_mb) if session['user_id'] == 'owner' else self.quota_mb}
+            if details['is_owner']:
+                with self.database() as conn:
+                    details.update(account_count=conn.execute('SELECT COUNT(*) FROM users').fetchone()[0] + 1, max_accounts=self.max_accounts)
+            return self.response(start, '200 OK', details)
         if path in ('/cloud-ui.js', '/cloud-ui.css') and method == 'GET':
             ext = path.rsplit('.', 1)[1]
             return self.response(start, '200 OK', (app.ROOT / 'web' / ('cloud-ui.' + ext)).read_bytes(), 'text/css; charset=utf-8' if ext == 'css' else 'application/javascript; charset=utf-8')
@@ -234,7 +165,20 @@ class Cloud:
                     return self.response(start, '400 Bad Request', {'error': 'Cette version utilise les comptes connectés dans ton navigateur. Aucun mot de passe Yahoo ou Google à enregistrer sur le serveur.'})
             except (ValueError, TypeError):
                 return self.response(start, '400 Bad Request', {'error': 'Réglages incorrects.'})
-        return self.legacy(env, start, body)
+        with tenant_lock:
+            if method == 'POST':
+                quota = (max(50, self.quota_mb) if session['user_id'] == 'owner' else self.quota_mb) * 1024 * 1024
+                reserve = len(body) * 4 + 65536
+                if path == '/api/cv/upload':
+                    try:
+                        reserve = len(base64.b64decode(json.loads(body).get('content', ''), validate=True)) + 65536
+                    except (ValueError, TypeError, AttributeError):
+                        pass
+                if path in ('/api/apply/prepare', '/api/followup/prepare', '/api/outbox/prepare'):
+                    reserve += max((p.stat().st_size for p in (engine.DATA / 'cv').glob('*.pdf')), default=0) * 2 + 262144
+                if self.tenants.usage(session['user_id']) + reserve > quota:
+                    return self.response(start, '413 Payload Too Large', {'error': 'Ton espace de stockage est presque plein. Exporte ton suivi et utilise des CV PDF plus légers avant de réessayer.'})
+            return self.legacy(env, start, body, engine)
 
 
 def main():

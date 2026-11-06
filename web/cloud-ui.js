@@ -8,7 +8,16 @@
     if(!response.ok)throw new Error('Reconnecte-toi à ton JobBot pour télécharger le module.');
     const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');a.href=url;a.download='JobBot_Cloud_Extension.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);
   }));
-  $('#cloud-logout').addEventListener('click',()=>run($('#cloud-logout'),async()=>{await api('/logout',{});location.assign('/login');}));
+  $('#cloud-logout').addEventListener('click',()=>run($('#cloud-logout'),async()=>{window.postMessage({channel:'jobbot-request',id:'logout-'+Date.now(),command:'ACCOUNT_LOGOUT',payload:{}},location.origin);await api('/logout',{});location.assign('/login');}));
+  fetch('/api/account',{headers:{'X-JobBot-Token':token}}).then(async response=>{
+    if(!response.ok)return;
+    const account=await response.json();
+    $('.cloud-bar strong').textContent='JobBot Cloud · '+account.username;
+    const detail=document.createElement('small');
+    detail.className='cloud-account';
+    detail.textContent=(account.used_bytes/1048576).toFixed(1)+' Mo utilisés / '+account.quota_mb+' Mo'+(account.is_owner?' · '+account.account_count+'/'+account.max_accounts+' comptes':'');
+    $('.cloud-bar p').append(document.createElement('br'),detail);
+  }).catch(()=>{});
   const originalRefresh=refreshFeed;
   refreshFeed=async function(){
     if(bridgeReady)return originalRefresh();

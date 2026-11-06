@@ -50,6 +50,16 @@ La carte utilise OpenStreetMap dans le navigateur et `geo.api.gouv.fr` pour iden
 
 ## Entretien et mises à jour
 
+### Partager avec des amis
+
+Partage l’adresse de ton site, ou directement son chemin `/register`. Les amis choisissent **Créer mon compte**, gardent leur code de secours, puis ajoutent leurs propres CV et connexions. Ne leur donne pas le mot de passe du compte d’origine `jobbot`. Les nouvelles inscriptions ne passent pas par la console PythonAnywhere.
+
+Chaque personne installe le module téléchargé depuis son espace dans son propre navigateur. Après cette mise à jour, remplace un ancien module Cloud pour bénéficier de l’arrêt des tâches lors du changement de compte. Le compte et les sessions du propriétaire sont migrés automatiquement.
+
+La configuration gratuite accepte par défaut 12 comptes au total, dont celui d’origine, et prévoit 20 Mo par nouveau compte. Ce format convient à un petit groupe. Les CV, profils, contacts, candidatures et lettres sont séparés entre comptes ; les nouveaux mots de passe et codes de secours ne sont pas conservés en clair. Le propriétaire de l’hébergement garde l’administration du stockage. Les emails automatiques de vérification ou de récupération ne sont pas activés : la récupération utilise le code de secours.
+
+### Mot de passe du compte d’origine
+
 Si la connexion refuse le mot de passe, vérifie que l’identifiant est bien `jobbot`. Pour choisir un nouveau mot de passe, lance dans ta console privée :
 
 ```sh

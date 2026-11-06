@@ -93,7 +93,7 @@ def db():
 
 
 def init():
-    migration_message = migration.restore(ROOT, DATA)
+    migration_message = '' if globals().get('CLOUD_TENANT') else migration.restore(ROOT, DATA)
     with db() as conn:
         conn.execute('CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, dedup TEXT UNIQUE NOT NULL, data TEXT NOT NULL)')
         conn.execute('CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, at TEXT, message TEXT)')
@@ -117,7 +117,7 @@ def cv_path(profile_id):
     name = PROFILES.get(profile_id, {}).get('cv', '')
     if not name or Path(name).name != name:
         return None
-    for base in (DATA / 'cv', ROOT / 'cv'):
+    for base in ((DATA / 'cv',) if globals().get('CLOUD_TENANT') else (DATA / 'cv', ROOT / 'cv')):
         path = base / name
         if path.is_file():
             return path
@@ -1088,7 +1088,7 @@ class Handler(BaseHTTPRequestHandler):
             files['/' + name] = (name, kind)
         if path.path in files:
             name, kind = files[path.path]
-            content = (ROOT / 'web' / name).read_text(encoding='utf-8').replace('__JOBBOT_TOKEN__', TOKEN)
+            content = (ROOT / 'web' / name).read_text(encoding='utf-8').replace('__JOBBOT_TOKEN__', TOKEN).replace('__JOBBOT_ACCOUNT__', globals().get('CLOUD_ACCOUNT_SCOPE', ''))
             if name == 'index.html':
                 snapshot = app_state()
                 bootstrap = json.dumps(snapshot, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')

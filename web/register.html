@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Créer mon compte · JobBot</title><link rel="stylesheet" href="/login.css"><script src="/login.js" defer></script></head>
+<body><main>
+  <div class="brand">J↗ <span>JobBot</span></div>
+  <p class="eyebrow">UN LIEN. TON ESPACE À TOI.</p>
+  <h1>Ton JobBot.<br>À ton rythme.</h1>
+  <p class="intro">Compare tes CV, prépare tes lettres et suis tes candidatures dans ton propre espace. Les autres comptes ne voient pas tes dossiers.</p>
+  <form method="post" action="/register">
+    <h2>Créer mon compte</h2>
+    <p role="alert" class="error">__LOGIN_ERROR__</p>
+    <input type="hidden" name="csrf" value="__LOGIN_CSRF__">
+    <label>Mon identifiant<input name="username" autocomplete="username" value="__LOGIN_USERNAME__" required autofocus minlength="3" maxlength="32" pattern="[a-zA-Z0-9][a-zA-Z0-9_.-]{2,31}" placeholder="Par exemple : alex27"></label>
+    <p class="field-hint">3 à 32 caractères, sans accent ni espace. Ton identifiant sert à te connecter.</p>
+    <label for="password">Mon mot de passe</label><input id="password" name="password" type="password" autocomplete="new-password" data-password required minlength="16" maxlength="200" aria-describedby="password-count">
+    <p class="field-hint" id="password-count" aria-live="polite">16 caractères minimum. Une phrase personnelle de plusieurs mots convient.</p>
+    <label for="confirmation">Confirmer le mot de passe</label><input id="confirmation" name="confirmation" type="password" autocomplete="new-password" data-password required minlength="16" maxlength="200">
+    <button id="password-visibility" class="password-visibility" type="button" aria-controls="password confirmation" aria-pressed="false" hidden>Afficher le mot de passe</button>
+    <button type="submit">Créer mon espace privé →</button>
+    <div class="auth-links"><a href="/login">J’ai déjà un compte</a></div>
+    <p class="note">Après l’inscription, garde ton code de secours : il permet de retrouver l’accès si tu oublies ton mot de passe. Ajoute ensuite tes CV et connecte tes propres comptes de messagerie et sites d’emploi. Ne partage pas tes identifiants.</p>
+  </form>
+</main></body></html>
