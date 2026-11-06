@@ -1,5 +1,5 @@
 /* Seulement les fichiers publics du site. Les documents privés restent dans le coffre. */
-const CACHE='moneyscout-static-1.2.0';
+const CACHE='moneyscout-static-1.2.1';
 const BASE=new URL('./',self.location.href);
 const ASSETS=['./','index.html','manifest.webmanifest','assets/theme.css','assets/mark.svg','assets/app.mjs','assets/core.mjs','assets/vault.mjs','assets/sources.mjs','assets/discovery.mjs','assets/pdf.mjs','assets/leaflet.js','assets/leaflet.css','assets/lib/jspdf.umd.min.js','assets/lib/pdf.min.mjs','assets/lib/pdf.worker.min.mjs','assets/lib/Vera.ttf'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(p=>new URL(p,BASE).href)))));

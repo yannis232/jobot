@@ -1,4 +1,4 @@
-export const APP_VERSION='1.2.0';
+export const APP_VERSION='1.2.1';
 export const SOURCES={GroupementMousquetaires:'Intermarché · Netto',METROMAKRO:'METRO France',EVERIENCE:'HELPLINE · Everience',AccorHotel:'Hôtels Accor',SopraSteria1:'Sopra Steria',Devoteam:'Devoteam',SEGULATechnologies:'SEGULA Technologies',Socotec:'SOCOTEC',VeoliaEnvironnementSA:'Veolia',EgisGroup:'Egis',Artelia:'Artelia',BoschGroup:'Bosch',Eurofins:'Eurofins',SIXT:'SIXT',Nexity:'Nexity',HanaGroup:'Hana Group',JYSK:'JYSK',HMGroup:'H&M',KIABI:'Kiabi'};
 export const CONTRACTS={all:'Tous les contrats',alternance:'Alternance / apprentissage',stage:'Stage',interim:'Intérim',cdi:'CDI',cdd:'CDD'};
 export function searchPhrase(query,kind='all'){const suffix={alternance:'alternance',stage:'stage',interim:'intérim',cdi:'CDI',cdd:'CDD'}[kind];return [String(query||'').trim(),suffix&& !norm(query).includes(norm(suffix))?suffix:''].filter(Boolean).join(' ');}
